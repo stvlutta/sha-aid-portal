@@ -32,11 +32,11 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
-              <span className="text-accent-foreground font-bold text-lg">SHA</span>
+              <span className="text-accent-foreground font-bold text-lg">LKP</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold">SHA Portal</h1>
-              <p className="text-xs opacity-90">Bursary & Subsidy Applications</p>
+              <h1 className="text-xl font-bold">Liet Ka Pas</h1>
+              <p className="text-xs opacity-90">Community Development</p>
             </div>
           </Link>
 

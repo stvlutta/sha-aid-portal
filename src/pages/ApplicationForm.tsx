@@ -100,7 +100,7 @@ const ApplicationForm = () => {
 
     toast({
       title: "Application Submitted",
-      description: "Your application has been submitted successfully. Reference ID: SHA-2024-001234",
+      description: "Your application has been submitted successfully. Reference ID: LKP-2024-001234",
       variant: "default"
     });
 
@@ -453,7 +453,7 @@ const ApplicationForm = () => {
                     Declaration and Consent *
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    I declare that all information provided is true and accurate. I understand that providing false information may result in the rejection of my application and/or legal action. I consent to SHA verifying the information provided and using my personal information for the purpose of processing this application.
+                    I declare that all information provided is true and accurate. I understand that providing false information may result in the rejection of my application and/or legal action. I consent to Liet Ka Pas verifying the information provided and using my personal information for the purpose of processing this application.
                   </p>
                 </div>
               </div>

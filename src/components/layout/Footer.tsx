@@ -8,22 +8,22 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Organization Info */}
           <div>
-            <h3 className="font-semibold text-foreground mb-4">School Health Authority</h3>
+            <h3 className="font-semibold text-foreground mb-4">Liet Ka Pas Community Development</h3>
             <p className="text-muted-foreground text-sm mb-4">
               Supporting education and health through accessible bursary and subsidy programs.
             </p>
             <div className="space-y-2 text-sm">
               <div className="flex items-center text-muted-foreground">
                 <MapPin className="w-4 h-4 mr-2" />
-                123 Education Street, City, State 12345
+                Community Development Office, Kenya
               </div>
               <div className="flex items-center text-muted-foreground">
                 <Phone className="w-4 h-4 mr-2" />
-                +1 (555) 123-4567
+                +254 (700) 123-4567
               </div>
               <div className="flex items-center text-muted-foreground">
                 <Mail className="w-4 h-4 mr-2" />
-                info@sha.gov
+                info@lietkapas.org
               </div>
             </div>
           </div>
@@ -86,7 +86,7 @@ const Footer = () => {
         <div className="border-t pt-6 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-muted-foreground text-sm">
-              © 2024 School Health Authority. All rights reserved.
+              © 2024 Liet Ka Pas Community Development. All rights reserved.
             </p>
             <p className="text-muted-foreground text-sm mt-2 md:mt-0">
               Portal Version 1.0
