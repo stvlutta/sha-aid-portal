@@ -9,8 +9,25 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, User, School, DollarSign, Upload } from "lucide-react";
+import { FileText, User, School, DollarSign, Upload, MapPin } from "lucide-react";
 import Layout from "@/components/layout/Layout";
+
+// Location data for Kenya
+const locationData = {
+  counties: [
+    'Nairobi', 'Mombasa', 'Kwale', 'Kilifi', 'Tana River', 'Lamu', 'Taita-Taveta', 'Garissa',
+    'Wajir', 'Mandera', 'Marsabit', 'Isiolo', 'Meru', 'Tharaka-Nithi', 'Embu', 'Kitui',
+    'Machakos', 'Makueni', 'Nyandarua', 'Nyeri', 'Kirinyaga', 'Murang\'a', 'Kiambu', 'Turkana',
+    'West Pokot', 'Samburu', 'Trans-Nzoia', 'Uasin Gishu', 'Elgeyo-Marakwet', 'Nandi',
+    'Baringo', 'Laikipia', 'Nakuru', 'Narok', 'Kajiado', 'Kericho', 'Bomet', 'Kakamega',
+    'Vihiga', 'Bungoma', 'Busia', 'Siaya', 'Kisumu', 'Homa Bay', 'Migori', 'Kisii', 'Nyamira'
+  ],
+  subCounties: {
+    'Nairobi': ['Westlands', 'Dagoretti North', 'Dagoretti South', 'Langata', 'Kibra', 'Roysambu', 'Kasarani', 'Ruaraka', 'Embakasi South', 'Embakasi North', 'Embakasi Central', 'Embakasi East', 'Embakasi West', 'Makadara', 'Kamukunji', 'Starehe', 'Mathare'],
+    'Mombasa': ['Changamwe', 'Jomba', 'Kisauni', 'Nyali', 'Likoni', 'Mvita'],
+    'Kiambu': ['Gatundu South', 'Gatundu North', 'Juja', 'Thika Town', 'Ruiru', 'Githunguri', 'Kiambu Town', 'Kiambaa', 'Kabete', 'Kikuyu', 'Limuru', 'Lari']
+  }
+};
 
 const ApplicationForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -23,7 +40,14 @@ const ApplicationForm = () => {
     idNumber: "",
     dateOfBirth: "",
     gender: "",
-    address: "",
+    
+    // Location Information
+    county: "",
+    subCounty: "",
+    division: "",
+    location: "",
+    subLocation: "",
+    village: "",
     
     // School Information
     schoolName: "",
@@ -45,7 +69,7 @@ const ApplicationForm = () => {
 
   const { toast } = useToast();
 
-  const totalSteps = 4;
+  const totalSteps = 5;
   const progress = (currentStep / totalSteps) * 100;
 
   const handleInputChange = (field: string, value: string | boolean | File[]) => {
@@ -181,20 +205,99 @@ const ApplicationForm = () => {
               </RadioGroup>
             </div>
 
-            <div>
-              <Label htmlFor="address">Full Address *</Label>
-              <Textarea
-                id="address"
-                value={formData.address}
-                onChange={(e) => handleInputChange("address", e.target.value)}
-                rows={3}
-                required
-              />
-            </div>
           </div>
         );
 
       case 2:
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center mb-6">
+              <MapPin className="w-6 h-6 text-primary mr-2" />
+              <h3 className="text-xl font-semibold">Location Information</h3>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="county">County *</Label>
+                <Select value={formData.county} onValueChange={(value) => handleInputChange("county", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select county" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locationData.counties.map((county) => (
+                      <SelectItem key={county} value={county}>{county}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="subCounty">Sub County *</Label>
+                <Select 
+                  value={formData.subCounty} 
+                  onValueChange={(value) => handleInputChange("subCounty", value)}
+                  disabled={!formData.county}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select sub county" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.county && locationData.subCounties[formData.county as keyof typeof locationData.subCounties]?.map((subCounty) => (
+                      <SelectItem key={subCounty} value={subCounty}>{subCounty}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="division">Division *</Label>
+                <Input
+                  id="division"
+                  value={formData.division}
+                  onChange={(e) => handleInputChange("division", e.target.value)}
+                  placeholder="Enter division"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="location">Location *</Label>
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange("location", e.target.value)}
+                  placeholder="Enter location"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="subLocation">Sub Location *</Label>
+                <Input
+                  id="subLocation"
+                  value={formData.subLocation}
+                  onChange={(e) => handleInputChange("subLocation", e.target.value)}
+                  placeholder="Enter sub location"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="village">Village *</Label>
+                <Input
+                  id="village"
+                  value={formData.village}
+                  onChange={(e) => handleInputChange("village", e.target.value)}
+                  placeholder="Enter village name"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 3:
         return (
           <div className="space-y-6">
             <div className="flex items-center mb-6">
@@ -246,7 +349,7 @@ const ApplicationForm = () => {
           </div>
         );
 
-      case 3:
+      case 4:
         return (
           <div className="space-y-6">
             <div className="flex items-center mb-6">
@@ -307,7 +410,7 @@ const ApplicationForm = () => {
           </div>
         );
 
-      case 4:
+      case 5:
         return (
           <div className="space-y-6">
             <div className="flex items-center mb-6">
