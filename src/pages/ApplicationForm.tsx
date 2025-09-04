@@ -1,0 +1,419 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { FileText, User, School, DollarSign, Upload } from "lucide-react";
+import Layout from "@/components/layout/Layout";
+
+const ApplicationForm = () => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState({
+    // Personal Information
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    idNumber: "",
+    dateOfBirth: "",
+    gender: "",
+    address: "",
+    
+    // School Information
+    schoolName: "",
+    grade: "",
+    studentId: "",
+    
+    // Application Details
+    applicationType: "",
+    category: "",
+    amount: "",
+    reason: "",
+    
+    // Documents
+    documents: [] as File[],
+    
+    // Declaration
+    declaration: false
+  });
+
+  const { toast } = useToast();
+
+  const totalSteps = 4;
+  const progress = (currentStep / totalSteps) * 100;
+
+  const handleInputChange = (field: string, value: string | boolean | File[]) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const nextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!formData.declaration) {
+      toast({
+        title: "Declaration Required",
+        description: "Please accept the declaration to submit your application.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Application Submitted",
+      description: "Your application has been submitted successfully. Reference ID: SHA-2024-001234",
+      variant: "default"
+    });
+
+    // Reset form or redirect
+    console.log("Form submitted:", formData);
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center mb-6">
+              <User className="w-6 h-6 text-primary mr-2" />
+              <h3 className="text-xl font-semibold">Personal Information</h3>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="firstName">First Name *</Label>
+                <Input
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={(e) => handleInputChange("firstName", e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName">Last Name *</Label>
+                <Input
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={(e) => handleInputChange("lastName", e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone">Phone Number *</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange("phone", e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="idNumber">ID Number *</Label>
+                <Input
+                  id="idNumber"
+                  value={formData.idNumber}
+                  onChange={(e) => handleInputChange("idNumber", e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+                <Input
+                  id="dateOfBirth"
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label>Gender *</Label>
+              <RadioGroup
+                value={formData.gender}
+                onValueChange={(value) => handleInputChange("gender", value)}
+                className="flex space-x-6 mt-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="male" id="male" />
+                  <Label htmlFor="male">Male</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="female" id="female" />
+                  <Label htmlFor="female">Female</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="other" id="other" />
+                  <Label htmlFor="other">Other</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div>
+              <Label htmlFor="address">Full Address *</Label>
+              <Textarea
+                id="address"
+                value={formData.address}
+                onChange={(e) => handleInputChange("address", e.target.value)}
+                rows={3}
+                required
+              />
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center mb-6">
+              <School className="w-6 h-6 text-primary mr-2" />
+              <h3 className="text-xl font-semibold">School Information</h3>
+            </div>
+
+            <div>
+              <Label htmlFor="schoolName">School Name *</Label>
+              <Input
+                id="schoolName"
+                value={formData.schoolName}
+                onChange={(e) => handleInputChange("schoolName", e.target.value)}
+                placeholder="Enter your school name"
+                required
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="grade">Grade/Year *</Label>
+                <Select value={formData.grade} onValueChange={(value) => handleInputChange("grade", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select grade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="grade8">Grade 8</SelectItem>
+                    <SelectItem value="grade9">Grade 9</SelectItem>
+                    <SelectItem value="grade10">Grade 10</SelectItem>
+                    <SelectItem value="grade11">Grade 11</SelectItem>
+                    <SelectItem value="grade12">Grade 12</SelectItem>
+                    <SelectItem value="university1">University Year 1</SelectItem>
+                    <SelectItem value="university2">University Year 2</SelectItem>
+                    <SelectItem value="university3">University Year 3</SelectItem>
+                    <SelectItem value="university4">University Year 4</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="studentId">Student ID Number *</Label>
+                <Input
+                  id="studentId"
+                  value={formData.studentId}
+                  onChange={(e) => handleInputChange("studentId", e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center mb-6">
+              <DollarSign className="w-6 h-6 text-primary mr-2" />
+              <h3 className="text-xl font-semibold">Application Details</h3>
+            </div>
+
+            <div>
+              <Label htmlFor="category">Category *</Label>
+              <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="education">Education</SelectItem>
+                  <SelectItem value="health">Health</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="applicationType">Application Type *</Label>
+              <Select value={formData.applicationType} onValueChange={(value) => handleInputChange("applicationType", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select application type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bursary">Bursary</SelectItem>
+                  <SelectItem value="subsidy">Subsidy</SelectItem>
+                  <SelectItem value="emergency">Emergency Assistance</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="amount">Requested Amount (ZAR) *</Label>
+              <Input
+                id="amount"
+                type="number"
+                value={formData.amount}
+                onChange={(e) => handleInputChange("amount", e.target.value)}
+                placeholder="e.g., 5000"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="reason">Reason for Application *</Label>
+              <Textarea
+                id="reason"
+                value={formData.reason}
+                onChange={(e) => handleInputChange("reason", e.target.value)}
+                rows={4}
+                placeholder="Please provide a detailed explanation of why you need this assistance..."
+                required
+              />
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center mb-6">
+              <Upload className="w-6 h-6 text-primary mr-2" />
+              <h3 className="text-xl font-semibold">Documents & Declaration</h3>
+            </div>
+
+            <div>
+              <Label htmlFor="documents">Required Documents</Label>
+              <div className="mt-2 p-4 border-2 border-dashed border-border rounded-lg">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Please upload the following documents:
+                </p>
+                <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                  <li>ID Document</li>
+                  <li>Proof of Registration</li>
+                  <li>Academic Transcript</li>
+                  <li>Proof of Income (Parent/Guardian)</li>
+                  <li>Bank Statement</li>
+                </ul>
+                <Input
+                  type="file"
+                  multiple
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  className="mt-3"
+                  onChange={(e) => handleInputChange("documents", Array.from(e.target.files || []))}
+                />
+              </div>
+            </div>
+
+            <div className="bg-muted p-4 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="declaration"
+                  checked={formData.declaration}
+                  onCheckedChange={(checked) => handleInputChange("declaration", checked as boolean)}
+                />
+                <div>
+                  <Label htmlFor="declaration" className="text-sm font-medium">
+                    Declaration and Consent *
+                  </Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    I declare that all information provided is true and accurate. I understand that providing false information may result in the rejection of my application and/or legal action. I consent to SHA verifying the information provided and using my personal information for the purpose of processing this application.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Layout>
+      <div className="py-8">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <FileText className="w-6 h-6 mr-2" />
+                Bursary & Subsidy Application
+              </CardTitle>
+              <CardDescription>
+                Complete the form below to apply for financial assistance
+              </CardDescription>
+              
+              <div className="mt-4">
+                <div className="flex justify-between text-sm text-muted-foreground mb-2">
+                  <span>Step {currentStep} of {totalSteps}</span>
+                  <span>{Math.round(progress)}% Complete</span>
+                </div>
+                <Progress value={progress} className="h-2" />
+              </div>
+            </CardHeader>
+
+            <CardContent>
+              {renderStepContent()}
+
+              <div className="flex justify-between mt-8 pt-6 border-t">
+                <Button
+                  variant="outline"
+                  onClick={prevStep}
+                  disabled={currentStep === 1}
+                >
+                  Previous
+                </Button>
+
+                {currentStep === totalSteps ? (
+                  <Button onClick={handleSubmit} className="bg-primary hover:bg-primary-hover">
+                    Submit Application
+                  </Button>
+                ) : (
+                  <Button onClick={nextStep} className="bg-primary hover:bg-primary-hover">
+                    Next
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default ApplicationForm;
