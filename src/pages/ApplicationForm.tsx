@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, User, School, DollarSign, Upload, MapPin } from "lucide-react";
+import { FileText, User, School, DollarSign, Upload, MapPin, Loader2, CheckCircle } from "lucide-react";
 import Layout from "@/components/layout/Layout";
+import { useAuth } from "@/hooks/useAuth";
+import AuthModal from "@/components/auth/AuthModal";
+import { submitApplication, uploadDocument, type ApplicationType } from "@/lib/supabase";
 
 // Location data for Kenya
 const locationData = {
@@ -31,13 +33,19 @@ const locationData = {
 
 const ApplicationForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const totalSteps = 5;
+
   const [formData, setFormData] = useState({
     // Personal Information
-    firstName: "",
-    lastName: "",
+    fullName: "",
     email: "",
     phone: "",
-    idNumber: "",
+    nationalId: "",
     dateOfBirth: "",
     gender: "",
     
@@ -51,62 +59,191 @@ const ApplicationForm = () => {
     
     // School Information
     schoolName: "",
-    grade: "",
-    studentId: "",
+    schoolLevel: "",
+    classYear: "",
     
     // Application Details
-    applicationType: "",
-    category: "",
-    amount: "",
-    reason: "",
+    applicationType: "" as ApplicationType | "",
+    householdSize: "",
+    monthlyIncome: "",
+    reasonForApplication: "",
     
     // Documents
-    documents: [] as File[],
-    
-    // Declaration
-    declaration: false
+    idDocument: null as File | null,
+    schoolFeesStructure: null as File | null,
+    incomeCertificate: null as File | null,
+    birthCertificate: null as File | null,
   });
 
-  const { toast } = useToast();
+  // Update email when user is authenticated
+  useEffect(() => {
+    if (user?.email && !formData.email) {
+      setFormData(prev => ({ ...prev, email: user.email || "" }));
+    }
+  }, [user]);
 
-  const totalSteps = 5;
-  const progress = (currentStep / totalSteps) * 100;
-
-  const handleInputChange = (field: string, value: string | boolean | File[]) => {
+  const handleInputChange = (field: string, value: string | File | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Reset sub county when county changes
+    if (field === "county") {
+      setFormData(prev => ({ ...prev, subCounty: "" }));
+    }
+  };
+
+  const handleFileUpload = (field: string, file: File | null) => {
+    setFormData(prev => ({ ...prev, [field]: file }));
+  };
+
+  const validateStep = (step: number): boolean => {
+    switch (step) {
+      case 1:
+        return !!(formData.fullName && formData.email && formData.phone && formData.nationalId && formData.dateOfBirth && formData.gender);
+      case 2:
+        return !!(formData.county && formData.subCounty && formData.division && formData.location && formData.subLocation && formData.village);
+      case 3:
+        return !!(formData.schoolName && formData.schoolLevel && formData.classYear);
+      case 4:
+        return !!(formData.applicationType && formData.householdSize && formData.reasonForApplication);
+      case 5:
+        return !!(formData.idDocument && formData.schoolFeesStructure);
+      default:
+        return false;
+    }
   };
 
   const nextStep = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+    } else {
+      toast({
+        title: "Incomplete Information",
+        description: "Please fill in all required fields before proceeding.",
+        variant: "destructive",
+      });
     }
   };
 
   const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
+    setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
-  const handleSubmit = () => {
-    if (!formData.declaration) {
+  const handleSubmit = async () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    if (!validateStep(5)) {
       toast({
-        title: "Declaration Required",
-        description: "Please accept the declaration to submit your application.",
-        variant: "destructive"
+        title: "Incomplete Application",
+        description: "Please fill in all required fields and upload all documents.",
+        variant: "destructive",
       });
       return;
     }
 
-    toast({
-      title: "Application Submitted",
-      description: "Your application has been submitted successfully. Reference ID: LKP-2024-001234",
-      variant: "default"
-    });
+    setIsSubmitting(true);
 
-    // Reset form or redirect
-    console.log("Form submitted:", formData);
+    try {
+      // Upload documents
+      const documentUrls: { [key: string]: string } = {};
+
+      if (formData.idDocument) {
+        const { data, error } = await uploadDocument(formData.idDocument, user.id, 'id-document');
+        if (error) throw error;
+        documentUrls.id_document_url = data?.url || '';
+      }
+
+      if (formData.schoolFeesStructure) {
+        const { data, error } = await uploadDocument(formData.schoolFeesStructure, user.id, 'school-fees');
+        if (error) throw error;
+        documentUrls.school_fees_structure_url = data?.url || '';
+      }
+
+      if (formData.incomeCertificate) {
+        const { data, error } = await uploadDocument(formData.incomeCertificate, user.id, 'income-certificate');
+        if (error) throw error;
+        documentUrls.income_certificate_url = data?.url || '';
+      }
+
+      if (formData.birthCertificate) {
+        const { data, error } = await uploadDocument(formData.birthCertificate, user.id, 'birth-certificate');
+        if (error) throw error;
+        documentUrls.birth_certificate_url = data?.url || '';
+      }
+
+      // Submit application
+      const applicationData = {
+        application_type: formData.applicationType as ApplicationType,
+        full_name: formData.fullName,
+        date_of_birth: formData.dateOfBirth,
+        gender: formData.gender as 'male' | 'female' | 'other',
+        phone: formData.phone,
+        email: formData.email,
+        national_id: formData.nationalId,
+        county: formData.county,
+        sub_county: formData.subCounty,
+        division: formData.division,
+        location: formData.location,
+        sub_location: formData.subLocation,
+        village: formData.village,
+        school_name: formData.schoolName,
+        school_level: formData.schoolLevel,
+        class_year: formData.classYear,
+        household_size: parseInt(formData.householdSize),
+        monthly_income: formData.monthlyIncome ? parseFloat(formData.monthlyIncome) : undefined,
+        reason_for_application: formData.reasonForApplication,
+        ...documentUrls,
+      };
+
+      const { error } = await submitApplication(applicationData);
+
+      if (error) {
+        throw error;
+      }
+
+      setIsSubmitted(true);
+      toast({
+        title: "Application Submitted!",
+        description: "Your application has been successfully submitted. You will receive updates via email.",
+      });
+
+    } catch (error: any) {
+      toast({
+        title: "Submission Failed",
+        description: error.message || "An error occurred while submitting your application.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (isSubmitted) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <CardTitle className="text-2xl text-green-600">Application Submitted!</CardTitle>
+              <CardDescription>
+                Your application has been successfully submitted. You will receive updates on your application status via email.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Button onClick={() => window.location.href = '/status'} className="w-full">
+                Check Application Status
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -117,29 +254,17 @@ const ApplicationForm = () => {
               <User className="w-6 h-6 text-primary mr-2" />
               <h3 className="text-xl font-semibold">Personal Information</h3>
             </div>
-            
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="firstName">First Name *</Label>
-                <Input
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="lastName">Last Name *</Label>
-                <Input
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  required
-                />
-              </div>
-            </div>
 
             <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="fullName">Full Name *</Label>
+                <Input
+                  id="fullName"
+                  value={formData.fullName}
+                  onChange={(e) => handleInputChange("fullName", e.target.value)}
+                  placeholder="Enter your full name"
+                />
+              </div>
               <div>
                 <Label htmlFor="email">Email Address *</Label>
                 <Input
@@ -147,28 +272,26 @@ const ApplicationForm = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  required
+                  placeholder="Enter your email"
                 />
               </div>
               <div>
                 <Label htmlFor="phone">Phone Number *</Label>
                 <Input
                   id="phone"
+                  type="tel"
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
-                  required
+                  placeholder="Enter your phone number"
                 />
               </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="idNumber">ID Number *</Label>
+                <Label htmlFor="nationalId">National ID Number *</Label>
                 <Input
-                  id="idNumber"
-                  value={formData.idNumber}
-                  onChange={(e) => handleInputChange("idNumber", e.target.value)}
-                  required
+                  id="nationalId"
+                  value={formData.nationalId}
+                  onChange={(e) => handleInputChange("nationalId", e.target.value)}
+                  placeholder="Enter your ID number"
                 />
               </div>
               <div>
@@ -178,33 +301,30 @@ const ApplicationForm = () => {
                   type="date"
                   value={formData.dateOfBirth}
                   onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
-                  required
                 />
               </div>
+              <div>
+                <Label>Gender *</Label>
+                <RadioGroup 
+                  value={formData.gender} 
+                  onValueChange={(value) => handleInputChange("gender", value)}
+                  className="flex flex-row space-x-6 mt-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="male" id="male" />
+                    <Label htmlFor="male">Male</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="female" id="female" />
+                    <Label htmlFor="female">Female</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="other" id="other" />
+                    <Label htmlFor="other">Other</Label>
+                  </div>
+                </RadioGroup>
+              </div>
             </div>
-
-            <div>
-              <Label>Gender *</Label>
-              <RadioGroup
-                value={formData.gender}
-                onValueChange={(value) => handleInputChange("gender", value)}
-                className="flex space-x-6 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="male" id="male" />
-                  <Label htmlFor="male">Male</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="female" id="female" />
-                  <Label htmlFor="female">Female</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="other" id="other" />
-                  <Label htmlFor="other">Other</Label>
-                </div>
-              </RadioGroup>
-            </div>
-
           </div>
         );
 
@@ -247,9 +367,6 @@ const ApplicationForm = () => {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="division">Division *</Label>
                 <Input
@@ -257,7 +374,6 @@ const ApplicationForm = () => {
                   value={formData.division}
                   onChange={(e) => handleInputChange("division", e.target.value)}
                   placeholder="Enter division"
-                  required
                 />
               </div>
               <div>
@@ -267,12 +383,8 @@ const ApplicationForm = () => {
                   value={formData.location}
                   onChange={(e) => handleInputChange("location", e.target.value)}
                   placeholder="Enter location"
-                  required
                 />
               </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="subLocation">Sub Location *</Label>
                 <Input
@@ -280,7 +392,6 @@ const ApplicationForm = () => {
                   value={formData.subLocation}
                   onChange={(e) => handleInputChange("subLocation", e.target.value)}
                   placeholder="Enter sub location"
-                  required
                 />
               </div>
               <div>
@@ -290,7 +401,6 @@ const ApplicationForm = () => {
                   value={formData.village}
                   onChange={(e) => handleInputChange("village", e.target.value)}
                   placeholder="Enter village name"
-                  required
                 />
               </div>
             </div>
@@ -305,44 +415,37 @@ const ApplicationForm = () => {
               <h3 className="text-xl font-semibold">School Information</h3>
             </div>
 
-            <div>
-              <Label htmlFor="schoolName">School Name *</Label>
-              <Input
-                id="schoolName"
-                value={formData.schoolName}
-                onChange={(e) => handleInputChange("schoolName", e.target.value)}
-                placeholder="Enter your school name"
-                required
-              />
-            </div>
-
             <div className="grid md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <Label htmlFor="schoolName">School Name *</Label>
+                <Input
+                  id="schoolName"
+                  value={formData.schoolName}
+                  onChange={(e) => handleInputChange("schoolName", e.target.value)}
+                  placeholder="Enter school name"
+                />
+              </div>
               <div>
-                <Label htmlFor="grade">Grade/Year *</Label>
-                <Select value={formData.grade} onValueChange={(value) => handleInputChange("grade", value)}>
+                <Label htmlFor="schoolLevel">School Level *</Label>
+                <Select value={formData.schoolLevel} onValueChange={(value) => handleInputChange("schoolLevel", value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select grade" />
+                    <SelectValue placeholder="Select school level" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="grade8">Grade 8</SelectItem>
-                    <SelectItem value="grade9">Grade 9</SelectItem>
-                    <SelectItem value="grade10">Grade 10</SelectItem>
-                    <SelectItem value="grade11">Grade 11</SelectItem>
-                    <SelectItem value="grade12">Grade 12</SelectItem>
-                    <SelectItem value="university1">University Year 1</SelectItem>
-                    <SelectItem value="university2">University Year 2</SelectItem>
-                    <SelectItem value="university3">University Year 3</SelectItem>
-                    <SelectItem value="university4">University Year 4</SelectItem>
+                    <SelectItem value="primary">Primary School</SelectItem>
+                    <SelectItem value="secondary">Secondary School</SelectItem>
+                    <SelectItem value="tertiary">Tertiary Institution</SelectItem>
+                    <SelectItem value="university">University</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="studentId">Student ID Number *</Label>
+                <Label htmlFor="classYear">Class/Year *</Label>
                 <Input
-                  id="studentId"
-                  value={formData.studentId}
-                  onChange={(e) => handleInputChange("studentId", e.target.value)}
-                  required
+                  id="classYear"
+                  value={formData.classYear}
+                  onChange={(e) => handleInputChange("classYear", e.target.value)}
+                  placeholder="e.g., Class 8, Form 4, Year 2"
                 />
               </div>
             </div>
@@ -357,55 +460,58 @@ const ApplicationForm = () => {
               <h3 className="text-xl font-semibold">Application Details</h3>
             </div>
 
-            <div>
-              <Label htmlFor="category">Category *</Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="education">Education</SelectItem>
-                  <SelectItem value="health">Health</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <div className="space-y-4">
+              <div>
+                <Label>Application Type *</Label>
+                <RadioGroup 
+                  value={formData.applicationType} 
+                  onValueChange={(value) => handleInputChange("applicationType", value)}
+                  className="flex flex-row space-x-6 mt-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="health" id="health" />
+                    <Label htmlFor="health">Health Bursary</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="education" id="education" />
+                    <Label htmlFor="education">Education Bursary</Label>
+                  </div>
+                </RadioGroup>
+              </div>
 
-            <div>
-              <Label htmlFor="applicationType">Application Type *</Label>
-              <Select value={formData.applicationType} onValueChange={(value) => handleInputChange("applicationType", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select application type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bursary">Bursary</SelectItem>
-                  <SelectItem value="subsidy">Subsidy</SelectItem>
-                  <SelectItem value="emergency">Emergency Assistance</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="householdSize">Household Size *</Label>
+                  <Input
+                    id="householdSize"
+                    type="number"
+                    value={formData.householdSize}
+                    onChange={(e) => handleInputChange("householdSize", e.target.value)}
+                    placeholder="Number of people in household"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="monthlyIncome">Monthly Income (KES)</Label>
+                  <Input
+                    id="monthlyIncome"
+                    type="number"
+                    value={formData.monthlyIncome}
+                    onChange={(e) => handleInputChange("monthlyIncome", e.target.value)}
+                    placeholder="Enter monthly income"
+                  />
+                </div>
+              </div>
 
-            <div>
-              <Label htmlFor="amount">Requested Amount (ZAR) *</Label>
-              <Input
-                id="amount"
-                type="number"
-                value={formData.amount}
-                onChange={(e) => handleInputChange("amount", e.target.value)}
-                placeholder="e.g., 5000"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="reason">Reason for Application *</Label>
-              <Textarea
-                id="reason"
-                value={formData.reason}
-                onChange={(e) => handleInputChange("reason", e.target.value)}
-                rows={4}
-                placeholder="Please provide a detailed explanation of why you need this assistance..."
-                required
-              />
+              <div>
+                <Label htmlFor="reasonForApplication">Reason for Application *</Label>
+                <Textarea
+                  id="reasonForApplication"
+                  value={formData.reasonForApplication}
+                  onChange={(e) => handleInputChange("reasonForApplication", e.target.value)}
+                  placeholder="Explain why you need this bursary..."
+                  rows={4}
+                />
+              </div>
             </div>
           </div>
         );
@@ -415,47 +521,60 @@ const ApplicationForm = () => {
           <div className="space-y-6">
             <div className="flex items-center mb-6">
               <Upload className="w-6 h-6 text-primary mr-2" />
-              <h3 className="text-xl font-semibold">Documents & Declaration</h3>
+              <h3 className="text-xl font-semibold">Required Documents</h3>
             </div>
 
-            <div>
-              <Label htmlFor="documents">Required Documents</Label>
-              <div className="mt-2 p-4 border-2 border-dashed border-border rounded-lg">
-                <p className="text-sm text-muted-foreground mb-2">
-                  Please upload the following documents:
-                </p>
-                <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-                  <li>ID Document</li>
-                  <li>Proof of Registration</li>
-                  <li>Academic Transcript</li>
-                  <li>Proof of Income (Parent/Guardian)</li>
-                  <li>Bank Statement</li>
-                </ul>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="idDocument">National ID/Birth Certificate *</Label>
                 <Input
+                  id="idDocument"
                   type="file"
-                  multiple
+                  onChange={(e) => handleFileUpload("idDocument", e.target.files?.[0] || null)}
                   accept=".pdf,.jpg,.jpeg,.png"
-                  className="mt-3"
-                  onChange={(e) => handleInputChange("documents", Array.from(e.target.files || []))}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Upload a clear copy of your ID or birth certificate
+                </p>
               </div>
-            </div>
 
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="declaration"
-                  checked={formData.declaration}
-                  onCheckedChange={(checked) => handleInputChange("declaration", checked as boolean)}
+              <div>
+                <Label htmlFor="schoolFeesStructure">School Fees Structure *</Label>
+                <Input
+                  id="schoolFeesStructure"
+                  type="file"
+                  onChange={(e) => handleFileUpload("schoolFeesStructure", e.target.files?.[0] || null)}
+                  accept=".pdf,.jpg,.jpeg,.png"
                 />
-                <div>
-                  <Label htmlFor="declaration" className="text-sm font-medium">
-                    Declaration and Consent *
-                  </Label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    I declare that all information provided is true and accurate. I understand that providing false information may result in the rejection of my application and/or legal action. I consent to Liet Ka Pas verifying the information provided and using my personal information for the purpose of processing this application.
-                  </p>
-                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Upload the official school fees structure
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="incomeCertificate">Income Certificate (Optional)</Label>
+                <Input
+                  id="incomeCertificate"
+                  type="file"
+                  onChange={(e) => handleFileUpload("incomeCertificate", e.target.files?.[0] || null)}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Upload proof of income if available
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="birthCertificate">Birth Certificate (Optional)</Label>
+                <Input
+                  id="birthCertificate"
+                  type="file"
+                  onChange={(e) => handleFileUpload("birthCertificate", e.target.files?.[0] || null)}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Upload birth certificate if different from ID
+                </p>
               </div>
             </div>
           </div>
@@ -468,53 +587,67 @@ const ApplicationForm = () => {
 
   return (
     <Layout>
-      <div className="py-8">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="w-6 h-6 mr-2" />
-                Bursary & Subsidy Application
-              </CardTitle>
-              <CardDescription>
-                Complete the form below to apply for financial assistance
-              </CardDescription>
-              
-              <div className="mt-4">
-                <div className="flex justify-between text-sm text-muted-foreground mb-2">
-                  <span>Step {currentStep} of {totalSteps}</span>
-                  <span>{Math.round(progress)}% Complete</span>
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold mb-2">Bursary Application</h1>
+              <p className="text-muted-foreground">Apply for bursary support from Liet Ka Pas Community Development</p>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between mb-4">
+                  <CardTitle>Step {currentStep} of {totalSteps}</CardTitle>
+                  <span className="text-sm text-muted-foreground">
+                    {Math.round((currentStep / totalSteps) * 100)}% Complete
+                  </span>
                 </div>
-                <Progress value={progress} className="h-2" />
-              </div>
-            </CardHeader>
+                <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
+              </CardHeader>
 
-            <CardContent>
-              {renderStepContent()}
+              <CardContent>
+                {renderStepContent()}
 
-              <div className="flex justify-between mt-8 pt-6 border-t">
-                <Button
-                  variant="outline"
-                  onClick={prevStep}
-                  disabled={currentStep === 1}
-                >
-                  Previous
-                </Button>
-
-                {currentStep === totalSteps ? (
-                  <Button onClick={handleSubmit} className="bg-primary hover:bg-primary-hover">
-                    Submit Application
+                <div className="flex justify-between mt-8">
+                  <Button
+                    variant="outline"
+                    onClick={prevStep}
+                    disabled={currentStep === 1}
+                  >
+                    Previous
                   </Button>
-                ) : (
-                  <Button onClick={nextStep} className="bg-primary hover:bg-primary-hover">
-                    Next
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+
+                  {currentStep === totalSteps ? (
+                    <Button 
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className="min-w-[120px]"
+                    >
+                      {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {isSubmitting ? "Submitting..." : "Submit Application"}
+                    </Button>
+                  ) : (
+                    <Button onClick={nextStep}>
+                      Next
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          // Retry submission after auth
+          setTimeout(handleSubmit, 100);
+        }}
+      />
     </Layout>
   );
 };
