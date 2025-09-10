@@ -4,10 +4,13 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
+  console.warn('Supabase environment variables are missing. Some features may not work.');
+  // Create a mock client for development
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = supabaseUrl && supabaseAnonKey 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null
 
 // Types for our database
 export type Profile = {
@@ -68,6 +71,7 @@ export type ContactSubmission = {
 
 // Auth helpers
 export const signUp = async (email: string, password: string, fullName: string) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not configured') };
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -81,6 +85,7 @@ export const signUp = async (email: string, password: string, fullName: string) 
 }
 
 export const signIn = async (email: string, password: string) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not configured') };
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -89,17 +94,20 @@ export const signIn = async (email: string, password: string) => {
 }
 
 export const signOut = async () => {
+  if (!supabase) return { error: new Error('Supabase not configured') };
   const { error } = await supabase.auth.signOut()
   return { error }
 }
 
 export const getCurrentUser = async () => {
+  if (!supabase) return { user: null, error: new Error('Supabase not configured') };
   const { data: { user }, error } = await supabase.auth.getUser()
   return { user, error }
 }
 
 // Application helpers
 export const submitApplication = async (applicationData: Omit<Application, 'id' | 'user_id' | 'status' | 'created_at' | 'updated_at'>) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not configured') };
   const { data, error } = await supabase
     .from('applications')
     .insert([applicationData])
@@ -110,6 +118,7 @@ export const submitApplication = async (applicationData: Omit<Application, 'id' 
 }
 
 export const getUserApplications = async (userId: string) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not configured') };
   const { data, error } = await supabase
     .from('applications')
     .select('*')
@@ -124,6 +133,7 @@ export const getAllApplications = async (filters?: {
   application_type?: ApplicationType
   status?: ApplicationStatus
 }) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not configured') };
   let query = supabase
     .from('applications')
     .select('*')
@@ -150,6 +160,7 @@ export const updateApplicationStatus = async (
   status: ApplicationStatus, 
   adminComments?: string
 ) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not configured') };
   const { data: { user } } = await supabase.auth.getUser()
   
   const { data, error } = await supabase
@@ -169,6 +180,7 @@ export const updateApplicationStatus = async (
 
 // Contact form helper
 export const submitContactForm = async (contactData: Omit<ContactSubmission, 'id' | 'created_at'>) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not configured') };
   const { data, error } = await supabase
     .from('contact_submissions')
     .insert([contactData])
@@ -180,6 +192,7 @@ export const submitContactForm = async (contactData: Omit<ContactSubmission, 'id
 
 // File upload helper
 export const uploadDocument = async (file: File, userId: string, documentType: string) => {
+  if (!supabase) return { data: null, error: new Error('Supabase not configured') };
   const fileExt = file.name.split('.').pop()
   const fileName = `${userId}/${documentType}-${Date.now()}.${fileExt}`
   
@@ -198,6 +211,7 @@ export const uploadDocument = async (file: File, userId: string, documentType: s
 
 // Check if user is admin
 export const checkAdminStatus = async (userId: string) => {
+  if (!supabase) return { isAdmin: false, error: new Error('Supabase not configured') };
   const { data, error } = await supabase
     .from('admin_users')
     .select('role')
