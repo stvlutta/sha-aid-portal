@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,73 +7,121 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Search, Clock, CheckCircle, XCircle, AlertCircle, FileText, Calendar, User } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { getUserApplications, type Application } from "@/lib/supabase";
 import Layout from "@/components/layout/Layout";
+import AuthModal from "@/components/auth/AuthModal";
 
 const ApplicationStatus = () => {
   const [referenceId, setReferenceId] = useState("");
-  const [searchResult, setSearchResult] = useState<any>(null);
+  const [searchResult, setSearchResult] = useState<Application | null>(null);
+  const [userApplications, setUserApplications] = useState<Application[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  // Mock data for demonstration
-  const mockApplication = {
-    id: "SHA-2024-001234",
-    applicantName: "John Doe",
-    applicationDate: "2024-01-15",
-    category: "Education",
-    type: "Bursary",
-    amount: "R 5,000",
-    status: "Under Review",
-    progress: 60,
-    statusHistory: [
+  useEffect(() => {
+    if (user) {
+      loadUserApplications();
+    }
+  }, [user]);
+
+  const loadUserApplications = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await getUserApplications(user.id);
+      if (error) throw error;
+      setUserApplications(data || []);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load your applications",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!referenceId.trim()) return;
+    
+    setIsLoading(true);
+    try {
+      // Search in user's applications if logged in
+      if (user) {
+        const found = userApplications.find(app => app.id === referenceId);
+        if (found) {
+          setSearchResult(found);
+        } else {
+          toast({
+            title: "Application Not Found",
+            description: "No application found with that reference ID",
+            variant: "destructive",
+          });
+        }
+      } else {
+        setShowAuthModal(true);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to search for application",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getProgressValue = (status: string) => {
+    switch (status) {
+      case 'pending': return 25;
+      case 'under_review': return 50;
+      case 'approved': return 100;
+      case 'rejected': return 100;
+      default: return 0;
+    }
+  };
+
+  const getStatusHistory = (application: Application) => {
+    const history = [
       {
         status: "Application Submitted",
-        date: "2024-01-15",
+        date: new Date(application.created_at).toLocaleDateString(),
         description: "Your application has been successfully submitted",
         completed: true
       },
-      {
-        status: "Documents Verified",
-        date: "2024-01-18",
-        description: "All required documents have been verified",
-        completed: true
-      },
-      {
-        status: "Under Review",
-        date: "2024-01-20",
-        description: "Your application is currently being reviewed by our team",
-        completed: true
-      },
-      {
-        status: "Decision Pending",
-        date: "Expected: 2024-02-05",
-        description: "Final decision will be communicated soon",
-        completed: false
-      },
-      {
-        status: "Notification Sent",
-        date: "Expected: 2024-02-10",
-        description: "Decision will be sent via email and SMS",
-        completed: false
-      }
-    ],
-    nextSteps: [
-      "Wait for review completion (estimated 2-3 business days)",
-      "Check email regularly for updates",
-      "Keep all original documents ready for collection"
-    ],
-    documents: [
-      { name: "ID Document", status: "verified", uploadDate: "2024-01-15" },
-      { name: "Proof of Registration", status: "verified", uploadDate: "2024-01-15" },
-      { name: "Academic Transcript", status: "verified", uploadDate: "2024-01-15" },
-      { name: "Proof of Income", status: "pending", uploadDate: "2024-01-15" },
-      { name: "Bank Statement", status: "verified", uploadDate: "2024-01-15" }
-    ]
-  };
+    ];
 
-  const handleSearch = () => {
-    if (referenceId.trim()) {
-      // In a real app, this would make an API call
-      setSearchResult(mockApplication);
+    if (application.status !== 'pending') {
+      history.push({
+        status: "Under Review",
+        date: application.reviewed_at ? new Date(application.reviewed_at).toLocaleDateString() : "In Progress",
+        description: "Your application is being reviewed by our team",
+        completed: true
+      });
     }
+
+    if (application.status === 'approved') {
+      history.push({
+        status: "Approved",
+        date: application.reviewed_at ? new Date(application.reviewed_at).toLocaleDateString() : "",
+        description: "Your application has been approved!",
+        completed: true
+      });
+    } else if (application.status === 'rejected') {
+      history.push({
+        status: "Rejected",
+        date: application.reviewed_at ? new Date(application.reviewed_at).toLocaleDateString() : "",
+        description: application.admin_comments || "Application was not approved",
+        completed: true
+      });
+    }
+
+    return history;
   };
 
   const getStatusIcon = (status: string) => {
@@ -149,14 +197,47 @@ const ApplicationStatus = () => {
                   />
                 </div>
                 <div className="flex items-end">
-                  <Button onClick={handleSearch} className="bg-primary hover:bg-primary-hover">
-                    <Search className="w-4 h-4 mr-2" />
-                    Search
-                  </Button>
+                <Button onClick={handleSearch} disabled={isLoading}>
+                  <Search className="w-4 h-4 mr-2" />
+                  {isLoading ? "Searching..." : "Search"}
+                </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* My Applications Section */}
+          {user && userApplications.length > 0 && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>My Applications</CardTitle>
+                <CardDescription>
+                  Your recent application submissions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {userApplications.map((app) => (
+                    <div 
+                      key={app.id} 
+                      className="flex items-center justify-between p-3 bg-muted rounded-lg cursor-pointer hover:bg-muted/80"
+                      onClick={() => setSearchResult(app)}
+                    >
+                      <div>
+                        <div className="font-medium">{app.full_name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {app.application_type} • {new Date(app.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <Badge variant={getStatusColor(app.status) as any}>
+                        {app.status.replace('_', ' ')}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Results Section */}
           {searchResult && (
@@ -171,7 +252,7 @@ const ApplicationStatus = () => {
                     </CardTitle>
                     <Badge variant={getStatusColor(searchResult.status) as any}>
                       {getStatusIcon(searchResult.status)}
-                      <span className="ml-2">{searchResult.status}</span>
+                      <span className="ml-2">{searchResult.status.replace('_', ' ')}</span>
                     </Badge>
                   </div>
                 </CardHeader>
@@ -181,12 +262,12 @@ const ApplicationStatus = () => {
                       <div className="flex items-center">
                         <User className="w-4 h-4 text-muted-foreground mr-2" />
                         <span className="text-sm text-muted-foreground">Applicant:</span>
-                        <span className="ml-2 font-medium">{searchResult.applicantName}</span>
+                        <span className="ml-2 font-medium">{searchResult.full_name}</span>
                       </div>
                       <div className="flex items-center">
                         <Calendar className="w-4 h-4 text-muted-foreground mr-2" />
                         <span className="text-sm text-muted-foreground">Application Date:</span>
-                        <span className="ml-2">{searchResult.applicationDate}</span>
+                        <span className="ml-2">{new Date(searchResult.created_at).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center">
                         <FileText className="w-4 h-4 text-muted-foreground mr-2" />
@@ -197,15 +278,15 @@ const ApplicationStatus = () => {
                     <div className="space-y-4">
                       <div>
                         <span className="text-sm text-muted-foreground">Category:</span>
-                        <Badge variant="outline" className="ml-2">{searchResult.category}</Badge>
+                        <Badge variant="outline" className="ml-2">{searchResult.application_type}</Badge>
                       </div>
                       <div>
-                        <span className="text-sm text-muted-foreground">Type:</span>
-                        <span className="ml-2">{searchResult.type}</span>
+                        <span className="text-sm text-muted-foreground">School:</span>
+                        <span className="ml-2">{searchResult.school_name}</span>
                       </div>
                       <div>
-                        <span className="text-sm text-muted-foreground">Amount:</span>
-                        <span className="ml-2 font-semibold text-lg">{searchResult.amount}</span>
+                        <span className="text-sm text-muted-foreground">Location:</span>
+                        <span className="ml-2">{searchResult.county}, {searchResult.sub_county}</span>
                       </div>
                     </div>
                   </div>
@@ -215,9 +296,9 @@ const ApplicationStatus = () => {
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-medium">Application Progress</span>
-                      <span className="text-sm text-muted-foreground">{searchResult.progress}%</span>
+                      <span className="text-sm text-muted-foreground">{getProgressValue(searchResult.status)}%</span>
                     </div>
-                    <Progress value={searchResult.progress} className="h-3" />
+                    <Progress value={getProgressValue(searchResult.status)} className="h-3" />
                   </div>
                 </CardContent>
               </Card>
@@ -232,7 +313,7 @@ const ApplicationStatus = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {searchResult.statusHistory.map((item: any, index: number) => (
+                    {getStatusHistory(searchResult).map((item, index) => (
                       <div key={index} className="flex items-start space-x-4">
                         <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
                           item.completed ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
@@ -258,68 +339,52 @@ const ApplicationStatus = () => {
                 </CardContent>
               </Card>
 
-              {/* Documents Status */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Document Verification</CardTitle>
-                  <CardDescription>
-                    Status of your submitted documents
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {searchResult.documents.map((doc: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          {getDocumentStatusIcon(doc.status)}
-                          <span className="font-medium">{doc.name}</span>
-                        </div>
-                        <div className="text-right">
-                          <Badge variant={doc.status === 'verified' ? 'default' : doc.status === 'pending' ? 'secondary' : 'destructive'}>
-                            {doc.status}
-                          </Badge>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Uploaded: {doc.uploadDate}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Next Steps */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Next Steps</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {searchResult.nextSteps.map((step: string, index: number) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                        <span className="text-sm">{step}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+              {/* Admin Comments */}
+              {searchResult.admin_comments && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Review Comments</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm">{searchResult.admin_comments}</p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
 
-          {/* Demo Hint */}
-          {!searchResult && (
+          {/* Info Section */}
+          {!searchResult && !user && (
             <Card className="bg-muted">
               <CardContent className="pt-6">
                 <div className="text-center">
                   <AlertCircle className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                   <p className="text-muted-foreground">
-                    <strong>Demo:</strong> Try searching with reference ID "SHA-2024-001234" to see a sample application status.
+                    Please sign in to view your applications or search by reference ID.
                   </p>
                 </div>
               </CardContent>
             </Card>
           )}
+
+          {!searchResult && user && userApplications.length === 0 && (
+            <Card className="bg-muted">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <AlertCircle className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">
+                    You haven't submitted any applications yet.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <AuthModal 
+            isOpen={showAuthModal} 
+            onClose={() => setShowAuthModal(false)}
+            onSuccess={() => setShowAuthModal(false)}
+          />
         </div>
       </div>
     </Layout>

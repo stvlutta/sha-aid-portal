@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,72 +19,78 @@ import {
   Eye,
   School
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { getAllApplications, updateApplicationStatus, type Application, type ApplicationStatus } from "@/lib/supabase";
 import Layout from "@/components/layout/Layout";
 
 const AdminDashboard = () => {
   const [selectedSchool, setSelectedSchool] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const { user, isAdmin } = useAuth();
+  const { toast } = useToast();
 
-  // Mock data
-  const dashboardStats = [
-    { icon: FileText, label: "Total Applications", value: "1,234", change: "+12%", category: "all" },
-    { icon: Clock, label: "Pending Review", value: "89", change: "+5%", category: "pending" },
-    { icon: CheckCircle, label: "Approved", value: "1,045", change: "+15%", category: "approved" },
-    { icon: XCircle, label: "Rejected", value: "100", change: "-8%", category: "rejected" }
-  ];
-
-  const educationStats = [
-    { label: "Education Applications", value: "789", percentage: 64 },
-    { label: "Avg. Amount", value: "R12,500", percentage: 0 },
-    { label: "Success Rate", value: "92%", percentage: 92 }
-  ];
-
-  const healthStats = [
-    { label: "Health Applications", value: "445", percentage: 36 },
-    { label: "Avg. Amount", value: "R8,200", percentage: 0 },
-    { label: "Success Rate", value: "88%", percentage: 88 }
-  ];
-
-  const recentApplications = [
-    {
-      id: "SHA-2024-001234",
-      applicant: "John Doe",
-      school: "Central High School",
-      category: "Education",
-      type: "Bursary",
-      amount: "R15,000",
-      status: "Under Review",
-      date: "2024-01-20"
-    },
-    {
-      id: "SHA-2024-001235",
-      applicant: "Jane Smith",
-      school: "Green Valley University",
-      category: "Health",
-      type: "Subsidy",
-      amount: "R8,500",
-      status: "Approved",
-      date: "2024-01-19"
-    },
-    {
-      id: "SHA-2024-001236",
-      applicant: "Mike Johnson",
-      school: "Tech Institute",
-      category: "Education",
-      type: "Emergency",
-      amount: "R5,000",
-      status: "Pending",
-      date: "2024-01-18"
+  useEffect(() => {
+    if (user && isAdmin) {
+      loadApplications();
     }
+  }, [user, isAdmin]);
+
+  const loadApplications = async () => {
+    try {
+      const { data, error } = await getAllApplications();
+      if (error) throw error;
+      setApplications(data || []);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load applications",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStatusUpdate = async (applicationId: string, newStatus: ApplicationStatus, comments?: string) => {
+    try {
+      const { error } = await updateApplicationStatus(applicationId, newStatus, comments);
+      if (error) throw error;
+      
+      await loadApplications();
+      toast({
+        title: "Status Updated",
+        description: "Application status has been updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update application status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Calculate stats from real data
+  const totalApplications = applications.length;
+  const pendingApplications = applications.filter(app => app.status === 'pending').length;
+  const underReviewApplications = applications.filter(app => app.status === 'under_review').length;
+  const approvedApplications = applications.filter(app => app.status === 'approved').length;
+  const rejectedApplications = applications.filter(app => app.status === 'rejected').length;
+  const educationApplications = applications.filter(app => app.application_type === 'education').length;
+  const healthApplications = applications.filter(app => app.application_type === 'health').length;
+
+  const dashboardStats = [
+    { icon: FileText, label: "Total Applications", value: totalApplications.toString(), change: "", category: "all" },
+    { icon: Clock, label: "Pending Review", value: (pendingApplications + underReviewApplications).toString(), change: "", category: "pending" },
+    { icon: CheckCircle, label: "Approved", value: approvedApplications.toString(), change: "", category: "approved" },
+    { icon: XCircle, label: "Rejected", value: rejectedApplications.toString(), change: "", category: "rejected" }
   ];
 
-  const schools = [
-    "Central High School",
-    "Green Valley University",
-    "Tech Institute",
-    "Medical College",
-    "Arts Academy"
-  ];
+  const schools = [...new Set(applications.map(app => app.school_name))].filter(Boolean);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -101,11 +107,25 @@ const AdminDashboard = () => {
     }
   };
 
-  const filteredApplications = recentApplications.filter(app => {
-    const schoolMatch = !selectedSchool || app.school === selectedSchool;
-    const statusMatch = !statusFilter || app.status.toLowerCase() === statusFilter.toLowerCase();
+  const filteredApplications = applications.filter(app => {
+    const schoolMatch = !selectedSchool || app.school_name === selectedSchool;
+    const statusMatch = !statusFilter || app.status === statusFilter;
     return schoolMatch && statusMatch;
   });
+
+  // Redirect if not admin
+  if (!isLoading && (!user || !isAdmin)) {
+    return (
+      <Layout>
+        <div className="py-8">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-2xl font-bold text-destructive mb-4">Access Denied</h1>
+            <p className="text-muted-foreground">You don't have permission to access the admin dashboard.</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -228,27 +248,42 @@ const AdminDashboard = () => {
                         <div key={app.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-1">
-                              <span className="font-medium">{app.applicant}</span>
+                              <span className="font-medium">{app.full_name}</span>
                               <Badge variant="outline" className="text-xs">
-                                {app.category}
+                                {app.application_type}
                               </Badge>
                             </div>
                             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                               <School className="w-3 h-3" />
-                              <span>{app.school}</span>
+                              <span>{app.school_name}</span>
                               <span>•</span>
-                              <span>{app.amount}</span>
+                              <span>{app.county}</span>
                             </div>
                           </div>
                           <div className="text-right">
                             <Badge variant={getStatusColor(app.status) as any} className="mb-1">
-                              {app.status}
+                              {app.status.replace('_', ' ')}
                             </Badge>
-                            <p className="text-xs text-muted-foreground">{app.date}</p>
+                            <p className="text-xs text-muted-foreground">{new Date(app.created_at).toLocaleDateString()}</p>
                           </div>
-                          <Button variant="ghost" size="sm" className="ml-2">
-                            <Eye className="w-4 h-4" />
-                          </Button>
+                          <div className="ml-2 space-x-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleStatusUpdate(app.id, 'approved')}
+                              disabled={app.status === 'approved'}
+                            >
+                              <CheckCircle className="w-4 h-4 text-success" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleStatusUpdate(app.id, 'rejected')}
+                              disabled={app.status === 'rejected'}
+                            >
+                              <XCircle className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -272,19 +307,19 @@ const AdminDashboard = () => {
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Education</span>
-                          <span>789 applications</span>
+                          <span>{educationApplications} applications</span>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2">
-                          <div className="bg-primary h-2 rounded-full" style={{ width: '64%' }}></div>
+                          <div className="bg-primary h-2 rounded-full" style={{ width: `${totalApplications > 0 ? (educationApplications / totalApplications) * 100 : 0}%` }}></div>
                         </div>
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Health</span>
-                          <span>445 applications</span>
+                          <span>{healthApplications} applications</span>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2">
-                          <div className="bg-accent h-2 rounded-full" style={{ width: '36%' }}></div>
+                          <div className="bg-accent h-2 rounded-full" style={{ width: `${totalApplications > 0 ? (healthApplications / totalApplications) * 100 : 0}%` }}></div>
                         </div>
                       </div>
                     </div>
@@ -296,29 +331,43 @@ const AdminDashboard = () => {
             {/* Education Tab */}
             <TabsContent value="education" className="space-y-6">
               <div className="grid md:grid-cols-3 gap-6">
-                {educationStats.map((stat, index) => (
-                  <Card key={index}>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-muted-foreground">{stat.label}</p>
-                          <p className="text-2xl font-bold">{stat.value}</p>
-                        </div>
-                        <GraduationCap className="w-8 h-8 text-primary" />
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Education Applications</p>
+                        <p className="text-2xl font-bold">{educationApplications}</p>
                       </div>
-                      {stat.percentage > 0 && (
-                        <div className="mt-4">
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <div 
-                              className="bg-primary h-2 rounded-full" 
-                              style={{ width: `${stat.percentage}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+                      <GraduationCap className="w-8 h-8 text-primary" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Approved Rate</p>
+                        <p className="text-2xl font-bold">
+                          {educationApplications > 0 ? Math.round((applications.filter(app => app.application_type === 'education' && app.status === 'approved').length / educationApplications) * 100) : 0}%
+                        </p>
+                      </div>
+                      <CheckCircle className="w-8 h-8 text-success" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Pending Review</p>
+                        <p className="text-2xl font-bold">
+                          {applications.filter(app => app.application_type === 'education' && (app.status === 'pending' || app.status === 'under_review')).length}
+                        </p>
+                      </div>
+                      <Clock className="w-8 h-8 text-warning" />
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               <Card>
@@ -327,19 +376,25 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {schools.slice(0, 5).map((school, index) => (
-                      <div key={school} className="flex items-center justify-between">
-                        <span className="font-medium">{school}</span>
-                        <div className="flex items-center space-x-4">
-                          <span className="text-sm text-muted-foreground">
-                            {Math.floor(Math.random() * 50 + 10)} applications
-                          </span>
-                          <Badge variant="outline">
-                            {Math.floor(Math.random() * 30 + 80)}% approval
-                          </Badge>
+                    {schools.slice(0, 5).map((school) => {
+                      const schoolApps = applications.filter(app => app.school_name === school && app.application_type === 'education');
+                      const approvedCount = schoolApps.filter(app => app.status === 'approved').length;
+                      const approvalRate = schoolApps.length > 0 ? Math.round((approvedCount / schoolApps.length) * 100) : 0;
+                      
+                      return (
+                        <div key={school} className="flex items-center justify-between">
+                          <span className="font-medium">{school}</span>
+                          <div className="flex items-center space-x-4">
+                            <span className="text-sm text-muted-foreground">
+                              {schoolApps.length} applications
+                            </span>
+                            <Badge variant="outline">
+                              {approvalRate}% approval
+                            </Badge>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -348,56 +403,76 @@ const AdminDashboard = () => {
             {/* Health Tab */}
             <TabsContent value="health" className="space-y-6">
               <div className="grid md:grid-cols-3 gap-6">
-                {healthStats.map((stat, index) => (
-                  <Card key={index}>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-muted-foreground">{stat.label}</p>
-                          <p className="text-2xl font-bold">{stat.value}</p>
-                        </div>
-                        <Heart className="w-8 h-8 text-accent" />
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Health Applications</p>
+                        <p className="text-2xl font-bold">{healthApplications}</p>
                       </div>
-                      {stat.percentage > 0 && (
-                        <div className="mt-4">
-                          <div className="w-full bg-muted rounded-full h-2">
-                            <div 
-                              className="bg-accent h-2 rounded-full" 
-                              style={{ width: `${stat.percentage}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+                      <Heart className="w-8 h-8 text-accent" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Approved Rate</p>
+                        <p className="text-2xl font-bold">
+                          {healthApplications > 0 ? Math.round((applications.filter(app => app.application_type === 'health' && app.status === 'approved').length / healthApplications) * 100) : 0}%
+                        </p>
+                      </div>
+                      <CheckCircle className="w-8 h-8 text-success" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Pending Review</p>
+                        <p className="text-2xl font-bold">
+                          {applications.filter(app => app.application_type === 'health' && (app.status === 'pending' || app.status === 'under_review')).length}
+                        </p>
+                      </div>
+                      <Clock className="w-8 h-8 text-warning" />
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Health Program Distribution</CardTitle>
+                  <CardTitle>Health Applications Overview</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">Medical Subsidies</span>
+                      <span className="font-medium">Total Health Applications</span>
                       <div className="flex items-center space-x-4">
-                        <span className="text-sm text-muted-foreground">267 applications</span>
-                        <Badge variant="outline">60%</Badge>
+                        <span className="text-sm text-muted-foreground">{healthApplications} applications</span>
+                        <Badge variant="outline">
+                          {totalApplications > 0 ? Math.round((healthApplications / totalApplications) * 100) : 0}% of total
+                        </Badge>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">Mental Health Support</span>
+                      <span className="font-medium">Approved Applications</span>
                       <div className="flex items-center space-x-4">
-                        <span className="text-sm text-muted-foreground">123 applications</span>
-                        <Badge variant="outline">28%</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {applications.filter(app => app.application_type === 'health' && app.status === 'approved').length} applications
+                        </span>
+                        <Badge variant="outline">Approved</Badge>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">Emergency Health Fund</span>
+                      <span className="font-medium">Under Review</span>
                       <div className="flex items-center space-x-4">
-                        <span className="text-sm text-muted-foreground">55 applications</span>
-                        <Badge variant="outline">12%</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {applications.filter(app => app.application_type === 'health' && (app.status === 'pending' || app.status === 'under_review')).length} applications
+                        </span>
+                        <Badge variant="outline">In Progress</Badge>
                       </div>
                     </div>
                   </div>
