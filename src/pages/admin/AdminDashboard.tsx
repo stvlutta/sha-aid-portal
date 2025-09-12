@@ -25,8 +25,8 @@ import { getAllApplications, updateApplicationStatus, type Application, type App
 import Layout from "@/components/layout/Layout";
 
 const AdminDashboard = () => {
-  const [selectedSchool, setSelectedSchool] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [selectedSchool, setSelectedSchool] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -108,8 +108,8 @@ const AdminDashboard = () => {
   };
 
   const filteredApplications = applications.filter(app => {
-    const schoolMatch = !selectedSchool || app.school_name === selectedSchool;
-    const statusMatch = !statusFilter || app.status === statusFilter;
+    const schoolMatch = selectedSchool === "all" || app.school_name === selectedSchool;
+    const statusMatch = statusFilter === "all" || app.status === statusFilter;
     return schoolMatch && statusMatch;
   });
 
@@ -188,7 +188,7 @@ const AdminDashboard = () => {
                       <SelectValue placeholder="All Schools" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Schools</SelectItem>
+                      <SelectItem value="all">All Schools</SelectItem>
                       {schools.map(school => (
                         <SelectItem key={school} value={school}>{school}</SelectItem>
                       ))}
@@ -202,7 +202,7 @@ const AdminDashboard = () => {
                       <SelectValue placeholder="All Status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Status</SelectItem>
+                      <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="approved">Approved</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="under review">Under Review</SelectItem>
