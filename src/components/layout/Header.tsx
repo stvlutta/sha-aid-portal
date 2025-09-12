@@ -46,7 +46,7 @@ const Header = () => {
               <Link key={link.to} to={link.to}>
                 <Button 
                   variant={location.pathname === link.to ? "secondary" : "ghost"}
-                  className="text-primary-foreground hover:bg-primary-hover"
+                  className={location.pathname === link.to ? "" : "text-primary-foreground hover:bg-white/10"}
                 >
                   {link.label}
                 </Button>
@@ -62,7 +62,7 @@ const Header = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden text-primary-foreground hover:bg-primary-hover"
+            className="md:hidden text-primary-foreground hover:bg-white/10"
             onClick={toggleMenu}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -77,7 +77,7 @@ const Header = () => {
                 <Link key={link.to} to={link.to} onClick={() => setIsMenuOpen(false)}>
                   <Button 
                     variant={location.pathname === link.to ? "secondary" : "ghost"}
-                    className="w-full justify-start text-primary-foreground hover:bg-primary-hover"
+                    className={`w-full justify-start ${location.pathname === link.to ? "" : "text-primary-foreground hover:bg-white/10"}`}
                   >
                     {link.label}
                   </Button>
