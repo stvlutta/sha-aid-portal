@@ -418,12 +418,66 @@ const ApplicationForm = () => {
             <div className="grid md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <Label htmlFor="schoolName">School Name *</Label>
-                <Input
-                  id="schoolName"
-                  value={formData.schoolName}
-                  onChange={(e) => handleInputChange("schoolName", e.target.value)}
-                  placeholder="Enter school name"
-                />
+                <Select value={formData.schoolName} onValueChange={(value) => handleInputChange("schoolName", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select school name" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-md max-h-60 overflow-y-auto z-50">
+                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">Ojolla Zone</div>
+                    <SelectItem value="Gongo Primary">Gongo Primary</SelectItem>
+                    <SelectItem value="Ogal Primary">Ogal Primary</SelectItem>
+                    <SelectItem value="Oyiengo Primary">Oyiengo Primary</SelectItem>
+                    <SelectItem value="Sabako Primary">Sabako Primary</SelectItem>
+                    <SelectItem value="St. Aloys Ojola School">St. Aloys Ojola School</SelectItem>
+                    <SelectItem value="Uradi Primary">Uradi Primary</SelectItem>
+                    <SelectItem value="Usare Primary/Secondary">Usare Primary/Secondary</SelectItem>
+                    <SelectItem value="Bara Primary">Bara Primary</SelectItem>
+                    <SelectItem value="Rota Primary">Rota Primary</SelectItem>
+                    <SelectItem value="Ongalo Primary">Ongalo Primary</SelectItem>
+                    <SelectItem value="Osiri Primary">Osiri Primary</SelectItem>
+                    <SelectItem value="Kibwayi Primary">Kibwayi Primary</SelectItem>
+                    <SelectItem value="Lisuka Primary">Lisuka Primary</SelectItem>
+                    <SelectItem value="Mboto Sunrise">Mboto Sunrise</SelectItem>
+                    <SelectItem value="Nyanginja Primary">Nyanginja Primary</SelectItem>
+                    <SelectItem value="Nyawara Primary">Nyawara Primary</SelectItem>
+                    <SelectItem value="Obambo Primary">Obambo Primary</SelectItem>
+                    <SelectItem value="Sambebe Primary">Sambebe Primary</SelectItem>
+                    
+                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground border-t mt-2 pt-2">Chulaimbo Zone</div>
+                    <SelectItem value="Eluhobe School">Eluhobe School</SelectItem>
+                    <SelectItem value="Kuoyo School">Kuoyo School</SelectItem>
+                    <SelectItem value="Maseno Girls Secondary School">Maseno Girls Secondary School</SelectItem>
+                    <SelectItem value="Marera Primary">Marera Primary</SelectItem>
+                    <SelectItem value="Nyakongo Primary">Nyakongo Primary</SelectItem>
+                    <SelectItem value="Odowa Primary">Odowa Primary</SelectItem>
+                    <SelectItem value="Chulaimbo Primary">Chulaimbo Primary</SelectItem>
+                    <SelectItem value="Mbaka Oromo Primary">Mbaka Oromo Primary</SelectItem>
+                    <SelectItem value="Nametsa Primary">Nametsa Primary</SelectItem>
+                    <SelectItem value="Sanganyinya Primary">Sanganyinya Primary</SelectItem>
+                    <SelectItem value="Sunga Primary">Sunga Primary</SelectItem>
+                    <SelectItem value="Maseno Mixed">Maseno Mixed</SelectItem>
+                    
+                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground border-t mt-2 pt-2">Otonglo Zone</div>
+                    <SelectItem value="Kanyamony School">Kanyamony School</SelectItem>
+                    <SelectItem value="Ngege Primary">Ngege Primary</SelectItem>
+                    <SelectItem value="Tiengre Primary">Tiengre Primary</SelectItem>
+                    <SelectItem value="Usoma Primary">Usoma Primary</SelectItem>
+                    <SelectItem value="Ogongo Primary">Ogongo Primary</SelectItem>
+                    <SelectItem value="Okore Ogonda Primary">Okore Ogonda Primary</SelectItem>
+                    <SelectItem value="Dr. Robert Ouko School">Dr. Robert Ouko School</SelectItem>
+                    <SelectItem value="Kanyamedha Primary/Secondary School">Kanyamedha Primary/Secondary School</SelectItem>
+                    
+                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground border-t mt-2 pt-2">Other School</div>
+                    <SelectItem value="other">Other (specify below)</SelectItem>
+                  </SelectContent>
+                </Select>
+                {formData.schoolName === "other" && (
+                  <Input
+                    className="mt-2"
+                    placeholder="Enter school name"
+                    onChange={(e) => handleInputChange("schoolName", e.target.value)}
+                  />
+                )}
               </div>
               <div>
                 <Label htmlFor="schoolLevel">School Level *</Label>
