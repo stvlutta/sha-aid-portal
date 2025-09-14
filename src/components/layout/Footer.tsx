@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -15,15 +15,7 @@ const Footer = () => {
             <div className="space-y-2 text-sm">
               <div className="flex items-center text-muted-foreground">
                 <MapPin className="w-4 h-4 mr-2" />
-                Community Development Office, Kenya
-              </div>
-              <div className="flex items-center text-muted-foreground">
-                <Phone className="w-4 h-4 mr-2" />
-                +254 (700) 123-4567
-              </div>
-              <div className="flex items-center text-muted-foreground">
-                <Mail className="w-4 h-4 mr-2" />
-                info@lietkapas.org
+                Kisumu West, Kenya
               </div>
             </div>
           </div>

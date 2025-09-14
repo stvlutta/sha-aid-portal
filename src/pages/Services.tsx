@@ -52,20 +52,17 @@ const Services = () => {
     {
       title: "Application Assistance",
       description: "Help with completing applications and gathering documents",
-      icon: Users,
-      contact: "assistance@lkpcd.org"
+      icon: Users
     },
     {
       title: "Financial Counseling",
       description: "Budgeting and financial planning support for recipients",
-      icon: Calculator,
-      contact: "+254 700 000 000"
+      icon: Calculator
     },
     {
       title: "Academic Mentoring",
       description: "Educational guidance and mentorship programs",
-      icon: GraduationCap,
-      contact: "mentors@lkpcd.org"
+      icon: GraduationCap
     }
   ];
 
@@ -75,7 +72,7 @@ const Services = () => {
     "Complete the online application form",
     "Submit application and await confirmation",
     "Track your application status online",
-    "Receive decision notification via email/SMS"
+    "Receive decision notification"
   ];
 
   return (
@@ -172,26 +169,9 @@ const Services = () => {
                       <div className="w-10 h-10 bg-muted text-foreground rounded-lg flex items-center justify-center flex-shrink-0">
                         <service.icon className="w-5 h-5" />
                       </div>
-                      <div className="flex-1">
+                      <div>
                         <h3 className="font-semibold mb-2">{service.title}</h3>
                         <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
-                        <div className="flex items-center text-sm">
-                          {service.contact.includes('@') ? (
-                            <>
-                              <Mail className="w-4 h-4 mr-2 text-primary" />
-                              <a href={`mailto:${service.contact}`} className="text-primary hover:underline">
-                                {service.contact}
-                              </a>
-                            </>
-                          ) : (
-                            <>
-                              <Phone className="w-4 h-4 mr-2 text-primary" />
-                              <a href={`tel:${service.contact}`} className="text-primary hover:underline">
-                                {service.contact}
-                              </a>
-                            </>
-                          )}
-                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -237,27 +217,11 @@ const Services = () => {
               <CardHeader>
                 <CardTitle className="text-center">Need Help?</CardTitle>
                 <CardDescription className="text-center">
-                  Our support team is here to assist you
+                  Visit our office in Kisumu West for assistance
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-3 gap-6 text-center">
-                  <div>
-                    <Phone className="w-8 h-8 text-primary mx-auto mb-3" />
-                    <h3 className="font-semibold mb-2">Phone Support</h3>
-                    <p className="text-sm text-muted-foreground mb-2">Monday - Friday, 8AM - 5PM</p>
-                    <a href="tel:+254700000000" className="text-primary hover:underline">
-                      +254 700 000 000
-                    </a>
-                  </div>
-                  <div>
-                    <Mail className="w-8 h-8 text-primary mx-auto mb-3" />
-                    <h3 className="font-semibold mb-2">Email Support</h3>
-                    <p className="text-sm text-muted-foreground mb-2">Response within 24 hours</p>
-                    <a href="mailto:support@lkpcd.org" className="text-primary hover:underline">
-                      support@lkpcd.org
-                    </a>
-                  </div>
+                <div className="text-center">
                   <div>
                     <Users className="w-8 h-8 text-primary mx-auto mb-3" />
                     <h3 className="font-semibold mb-2">In-Person Help</h3>
