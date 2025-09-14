@@ -10,21 +10,18 @@ const Services = () => {
     {
       title: "Tuition Bursaries",
       description: "Full or partial coverage of school and university tuition fees",
-      amount: "Up to R50,000/year",
       eligibility: "Academic merit + Financial need",
       icon: GraduationCap
     },
     {
       title: "Textbook Allowance",
       description: "Annual allowance for required textbooks and learning materials",
-      amount: "Up to R3,000/year",
       eligibility: "All registered students",
       icon: BookOpen
     },
     {
       title: "Emergency Education Fund",
       description: "Urgent financial assistance for unexpected educational expenses",
-      amount: "Up to R10,000",
       eligibility: "Crisis situations only",
       icon: Calculator
     }
@@ -34,21 +31,18 @@ const Services = () => {
     {
       title: "Medical Care Subsidies",
       description: "Assistance with medical consultations, treatments, and procedures",
-      amount: "Up to R25,000/year",
       eligibility: "Income-based assessment",
       icon: Stethoscope
     },
     {
       title: "Mental Health Support",
       description: "Counseling and therapy services for students and families",
-      amount: "Up to R8,000/year",
       eligibility: "Referral required",
       icon: Heart
     },
     {
       title: "Health Emergency Fund",
       description: "Urgent medical assistance for emergency situations",
-      amount: "Up to R50,000",
       eligibility: "Medical emergency only",
       icon: Heart
     }
@@ -59,19 +53,19 @@ const Services = () => {
       title: "Application Assistance",
       description: "Help with completing applications and gathering documents",
       icon: Users,
-      contact: "assistance@sha.gov"
+      contact: "assistance@lkpcd.org"
     },
     {
       title: "Financial Counseling",
       description: "Budgeting and financial planning support for recipients",
       icon: Calculator,
-      contact: "+1 (555) 123-4567"
+      contact: "+254 700 000 000"
     },
     {
       title: "Academic Mentoring",
       description: "Educational guidance and mentorship programs",
       icon: GraduationCap,
-      contact: "mentors@sha.gov"
+      contact: "mentors@lkpcd.org"
     }
   ];
 
@@ -96,34 +90,6 @@ const Services = () => {
             </p>
           </div>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-            <Card className="text-center">
-              <CardContent className="pt-6">
-                <div className="text-3xl font-bold text-primary mb-1">R2.5M</div>
-                <div className="text-sm text-muted-foreground">Disbursed This Year</div>
-              </CardContent>
-            </Card>
-            <Card className="text-center">
-              <CardContent className="pt-6">
-                <div className="text-3xl font-bold text-primary mb-1">1,200+</div>
-                <div className="text-sm text-muted-foreground">Students Supported</div>
-              </CardContent>
-            </Card>
-            <Card className="text-center">
-              <CardContent className="pt-6">
-                <div className="text-3xl font-bold text-primary mb-1">95%</div>
-                <div className="text-sm text-muted-foreground">Success Rate</div>
-              </CardContent>
-            </Card>
-            <Card className="text-center">
-              <CardContent className="pt-6">
-                <div className="text-3xl font-bold text-primary mb-1">24/7</div>
-                <div className="text-sm text-muted-foreground">Support Available</div>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Education Services */}
           <section className="mb-16">
             <div className="flex items-center mb-8">
@@ -138,7 +104,6 @@ const Services = () => {
                       <div className="w-12 h-12 bg-primary text-primary-foreground rounded-lg flex items-center justify-center">
                         <service.icon className="w-6 h-6" />
                       </div>
-                      <Badge variant="secondary">{service.amount}</Badge>
                     </div>
                     <CardTitle>{service.title}</CardTitle>
                     <CardDescription>{service.description}</CardDescription>
@@ -173,7 +138,6 @@ const Services = () => {
                       <div className="w-12 h-12 bg-accent text-accent-foreground rounded-lg flex items-center justify-center">
                         <service.icon className="w-6 h-6" />
                       </div>
-                      <Badge variant="outline">{service.amount}</Badge>
                     </div>
                     <CardTitle>{service.title}</CardTitle>
                     <CardDescription>{service.description}</CardDescription>
@@ -258,7 +222,7 @@ const Services = () => {
                 </div>
                 <div className="flex justify-center mt-8">
                   <Link to="/application">
-                    <Button size="lg" className="bg-primary hover:bg-primary-hover">
+                    <Button size="lg" className="bg-primary hover:bg-primary/90">
                       Start Your Application
                     </Button>
                   </Link>
@@ -282,23 +246,23 @@ const Services = () => {
                     <Phone className="w-8 h-8 text-primary mx-auto mb-3" />
                     <h3 className="font-semibold mb-2">Phone Support</h3>
                     <p className="text-sm text-muted-foreground mb-2">Monday - Friday, 8AM - 5PM</p>
-                    <a href="tel:+1555123456" className="text-primary hover:underline">
-                      +1 (555) 123-4567
+                    <a href="tel:+254700000000" className="text-primary hover:underline">
+                      +254 700 000 000
                     </a>
                   </div>
                   <div>
                     <Mail className="w-8 h-8 text-primary mx-auto mb-3" />
                     <h3 className="font-semibold mb-2">Email Support</h3>
                     <p className="text-sm text-muted-foreground mb-2">Response within 24 hours</p>
-                    <a href="mailto:support@sha.gov" className="text-primary hover:underline">
-                      support@sha.gov
+                    <a href="mailto:support@lkpcd.org" className="text-primary hover:underline">
+                      support@lkpcd.org
                     </a>
                   </div>
                   <div>
                     <Users className="w-8 h-8 text-primary mx-auto mb-3" />
                     <h3 className="font-semibold mb-2">In-Person Help</h3>
                     <p className="text-sm text-muted-foreground mb-2">Visit our office</p>
-                    <p className="text-sm">123 Education Street, City</p>
+                    <p className="text-sm">Kisumu West, Kenya</p>
                   </div>
                 </div>
               </CardContent>

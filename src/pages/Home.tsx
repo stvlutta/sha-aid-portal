@@ -6,12 +6,6 @@ import { GraduationCap, Heart, FileText, Clock, Users, CheckCircle } from "lucid
 import Layout from "@/components/layout/Layout";
 
 const Home = () => {
-  const stats = [
-    { icon: Users, label: "Applications Processed", value: "5,234" },
-    { icon: CheckCircle, label: "Approved This Year", value: "4,876" },
-    { icon: GraduationCap, label: "Students Supported", value: "12,450" },
-    { icon: Heart, label: "Health Programs", value: "28" }
-  ];
 
   const services = [
     {
@@ -64,22 +58,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-12 bg-muted">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-lg mb-3">
-                  <stat.icon className="w-6 h-6" />
-                </div>
-                <div className="text-2xl font-bold text-foreground">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Services Section */}
       <section className="py-16">
