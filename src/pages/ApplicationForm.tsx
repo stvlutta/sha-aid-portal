@@ -320,10 +320,6 @@ const ApplicationForm = () => {
                     <RadioGroupItem value="female" id="female" />
                     <Label htmlFor="female">Female</Label>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="other" id="other" />
-                    <Label htmlFor="other">Other</Label>
-                  </div>
                 </RadioGroup>
               </div>
             </div>
