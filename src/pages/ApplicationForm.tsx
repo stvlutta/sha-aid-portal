@@ -283,7 +283,7 @@ const ApplicationForm = () => {
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
                   placeholder="Enter your phone number"
-                  maxLength={15}
+                  maxLength={12}
                 />
               </div>
               <div>
