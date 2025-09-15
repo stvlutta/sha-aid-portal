@@ -257,7 +257,7 @@ const ApplicationForm = () => {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="fullName">Full Name *</Label>
+                <Label htmlFor="fullName">Full Name <span className="text-destructive">*</span></Label>
                 <Input
                   id="fullName"
                   value={formData.fullName}
@@ -266,7 +266,7 @@ const ApplicationForm = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email Address *</Label>
+                <Label htmlFor="email">Email Address <span className="text-destructive">*</span></Label>
                 <Input
                   id="email"
                   type="email"
@@ -276,26 +276,28 @@ const ApplicationForm = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="phone">Phone Number *</Label>
+                <Label htmlFor="phone">Phone Number <span className="text-destructive">*</span></Label>
                 <Input
                   id="phone"
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
                   placeholder="Enter your phone number"
+                  maxLength={15}
                 />
               </div>
               <div>
-                <Label htmlFor="nationalId">National ID Number *</Label>
+                <Label htmlFor="nationalId">National ID Number <span className="text-destructive">*</span></Label>
                 <Input
                   id="nationalId"
                   value={formData.nationalId}
                   onChange={(e) => handleInputChange("nationalId", e.target.value)}
                   placeholder="Enter your ID number"
+                  maxLength={10}
                 />
               </div>
               <div>
-                <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+                <Label htmlFor="dateOfBirth">Date of Birth <span className="text-destructive">*</span></Label>
                 <Input
                   id="dateOfBirth"
                   type="date"
@@ -304,7 +306,7 @@ const ApplicationForm = () => {
                 />
               </div>
               <div>
-                <Label>Gender *</Label>
+                <Label>Gender <span className="text-destructive">*</span></Label>
                 <RadioGroup 
                   value={formData.gender} 
                   onValueChange={(value) => handleInputChange("gender", value)}
@@ -338,7 +340,7 @@ const ApplicationForm = () => {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="county">County *</Label>
+                <Label htmlFor="county">County <span className="text-destructive">*</span></Label>
                 <Select value={formData.county} onValueChange={(value) => handleInputChange("county", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select county" />
@@ -351,7 +353,7 @@ const ApplicationForm = () => {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="subCounty">Sub County *</Label>
+                <Label htmlFor="subCounty">Sub County <span className="text-destructive">*</span></Label>
                 <Select 
                   value={formData.subCounty} 
                   onValueChange={(value) => handleInputChange("subCounty", value)}
@@ -368,7 +370,7 @@ const ApplicationForm = () => {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="division">Division *</Label>
+                <Label htmlFor="division">Division <span className="text-destructive">*</span></Label>
                 <Input
                   id="division"
                   value={formData.division}
@@ -377,7 +379,7 @@ const ApplicationForm = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="location">Location *</Label>
+                <Label htmlFor="location">Location <span className="text-destructive">*</span></Label>
                 <Input
                   id="location"
                   value={formData.location}
@@ -386,7 +388,7 @@ const ApplicationForm = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="subLocation">Sub Location *</Label>
+                <Label htmlFor="subLocation">Sub Location <span className="text-destructive">*</span></Label>
                 <Input
                   id="subLocation"
                   value={formData.subLocation}
@@ -395,7 +397,7 @@ const ApplicationForm = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="village">Village *</Label>
+                <Label htmlFor="village">Village <span className="text-destructive">*</span></Label>
                 <Input
                   id="village"
                   value={formData.village}
@@ -417,7 +419,7 @@ const ApplicationForm = () => {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <Label htmlFor="schoolName">School Name *</Label>
+                <Label htmlFor="schoolName">School Name <span className="text-destructive">*</span></Label>
                 <Select value={formData.schoolName} onValueChange={(value) => handleInputChange("schoolName", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select school name" />
@@ -480,7 +482,7 @@ const ApplicationForm = () => {
                 )}
               </div>
               <div>
-                <Label htmlFor="schoolLevel">School Level *</Label>
+                <Label htmlFor="schoolLevel">School Level <span className="text-destructive">*</span></Label>
                 <Select value={formData.schoolLevel} onValueChange={(value) => handleInputChange("schoolLevel", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select school level" />
@@ -494,7 +496,7 @@ const ApplicationForm = () => {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="classYear">Class/Year *</Label>
+                <Label htmlFor="classYear">Class/Year <span className="text-destructive">*</span></Label>
                 <Input
                   id="classYear"
                   value={formData.classYear}
@@ -516,7 +518,7 @@ const ApplicationForm = () => {
 
             <div className="space-y-4">
               <div>
-                <Label>Application Type *</Label>
+                <Label>Application Type <span className="text-destructive">*</span></Label>
                 <RadioGroup 
                   value={formData.applicationType} 
                   onValueChange={(value) => handleInputChange("applicationType", value)}
@@ -535,7 +537,7 @@ const ApplicationForm = () => {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="householdSize">Household Size *</Label>
+                  <Label htmlFor="householdSize">Household Size <span className="text-destructive">*</span></Label>
                   <Input
                     id="householdSize"
                     type="number"
@@ -557,7 +559,7 @@ const ApplicationForm = () => {
               </div>
 
               <div>
-                <Label htmlFor="reasonForApplication">Reason for Application *</Label>
+                <Label htmlFor="reasonForApplication">Reason for Application <span className="text-destructive">*</span></Label>
                 <Textarea
                   id="reasonForApplication"
                   value={formData.reasonForApplication}
@@ -580,7 +582,7 @@ const ApplicationForm = () => {
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="idDocument">National ID/Birth Certificate *</Label>
+                <Label htmlFor="idDocument">National ID/Birth Certificate <span className="text-destructive">*</span></Label>
                 <Input
                   id="idDocument"
                   type="file"
@@ -593,7 +595,7 @@ const ApplicationForm = () => {
               </div>
 
               <div>
-                <Label htmlFor="schoolFeesStructure">School Fees Structure *</Label>
+                <Label htmlFor="schoolFeesStructure">School Fees Structure <span className="text-destructive">*</span></Label>
                 <Input
                   id="schoolFeesStructure"
                   type="file"
