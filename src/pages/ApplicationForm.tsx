@@ -522,11 +522,11 @@ const ApplicationForm = () => {
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="health" id="health" />
-                    <Label htmlFor="health">Health Bursary</Label>
+                    <Label htmlFor="health">Health Scholarship</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="education" id="education" />
-                    <Label htmlFor="education">Education Bursary</Label>
+                    <Label htmlFor="education">Education Scholarship</Label>
                   </div>
                 </RadioGroup>
               </div>
@@ -560,7 +560,7 @@ const ApplicationForm = () => {
                   id="reasonForApplication"
                   value={formData.reasonForApplication}
                   onChange={(e) => handleInputChange("reasonForApplication", e.target.value)}
-                  placeholder="Explain why you need this bursary..."
+                  placeholder="Explain why you need this scholarship..."
                   rows={4}
                 />
               </div>
@@ -643,8 +643,8 @@ const ApplicationForm = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-2">Bursary Application</h1>
-              <p className="text-muted-foreground">Apply for bursary support from Liet Ka Pas Community Development</p>
+              <h1 className="text-3xl font-bold mb-2">Scholarship Application</h1>
+              <p className="text-muted-foreground">Apply for scholarship support from Liet Ka Pas Community Development</p>
             </div>
 
             <Card>

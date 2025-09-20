@@ -102,7 +102,7 @@ const Home = () => {
                 <CardContent className="p-6 text-center">
                   <FileText className="w-8 h-8 text-primary mx-auto mb-3" />
                   <h3 className="font-semibold mb-2">New Application</h3>
-                  <p className="text-sm text-muted-foreground">Start your bursary application</p>
+                  <p className="text-sm text-muted-foreground">Start your scholarship application</p>
                 </CardContent>
               </Card>
             </Link>

@@ -8,7 +8,7 @@ import Layout from "@/components/layout/Layout";
 const Tutorials = () => {
   const videoTutorials = [
     {
-      title: "How to Apply for a Bursary",
+      title: "How to Apply for a Scholarship",
       duration: "8:32",
       thumbnail: "/placeholder.svg",
       description: "Step-by-step guide through the entire application process",

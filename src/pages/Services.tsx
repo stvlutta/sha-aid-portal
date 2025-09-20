@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 const Services = () => {
   const educationServices = [
     {
-      title: "Tuition Bursaries",
+      title: "Tuition Scholarships",
       description: "Full or partial coverage of school and university tuition fees",
       eligibility: "Academic merit + Financial need",
       icon: GraduationCap
@@ -29,7 +29,7 @@ const Services = () => {
 
   const healthServices = [
     {
-      title: "Medical Care Subsidies",
+      title: "Medical Care Health Program",
       description: "Assistance with medical consultations, treatments, and procedures",
       eligibility: "Income-based assessment",
       icon: Stethoscope
@@ -204,6 +204,27 @@ const Services = () => {
                   <Link to="/application">
                     <Button size="lg" className="bg-primary hover:bg-primary/90">
                       Start Your Application
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* Welfare and Community Groups */}
+          <section className="mb-16">
+            <Card className="bg-accent/10 border-accent">
+              <CardHeader>
+                <CardTitle className="text-center">Welfare and Community Based Groups</CardTitle>
+                <CardDescription className="text-center">
+                  Special support programs for community organizations and welfare groups
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center">
+                  <Link to="/application">
+                    <Button variant="outline" size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                      Apply for Group Support
                     </Button>
                   </Link>
                 </div>

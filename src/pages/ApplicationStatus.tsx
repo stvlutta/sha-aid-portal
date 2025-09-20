@@ -170,7 +170,7 @@ const ApplicationStatus = () => {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-4">Application Status</h1>
             <p className="text-muted-foreground">
-              Track the progress of your bursary or subsidy application
+              Track the progress of your scholarship or health program application
             </p>
           </div>
 

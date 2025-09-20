@@ -135,7 +135,7 @@ const AdminDashboard = () => {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-              <p className="text-muted-foreground">Monitor and manage bursary applications</p>
+              <p className="text-muted-foreground">Monitor and manage scholarship applications</p>
             </div>
             <div className="flex space-x-2">
               <Button variant="outline">

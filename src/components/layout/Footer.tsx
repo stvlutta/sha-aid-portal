@@ -10,7 +10,7 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold text-foreground mb-4">Liet Ka Pas Community Development</h3>
             <p className="text-muted-foreground text-sm mb-4">
-              Supporting education and health through accessible bursary and subsidy programs.
+              Supporting education and health through accessible scholarship and health programs.
             </p>
             <div className="space-y-2 text-sm">
               <div className="flex items-center text-muted-foreground">
@@ -26,7 +26,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/application" className="text-muted-foreground hover:text-primary">
-                  Apply for Bursary
+                  Apply for Scholarship
                 </Link>
               </li>
               <li>
