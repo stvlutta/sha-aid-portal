@@ -40,7 +40,7 @@ const Tutorials = () => {
   const faqItems = [
     {
       question: "Who is eligible to apply for SHA bursaries?",
-      answer: "Students enrolled in registered educational institutions who meet our financial need criteria are eligible. This includes high school students (grades 8-12) and university students. Applicants must be South African citizens or permanent residents."
+      answer: "Students enrolled in registered educational institutions who meet our financial need criteria are eligible. This includes high school students (grades 8-12) and university students. Applicants must be Kenyan citizens or permanent residents."
     },
     {
       question: "What documents do I need to submit?",
