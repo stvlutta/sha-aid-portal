@@ -27,7 +27,63 @@ const locationData = {
   subCounties: {
     'Nairobi': ['Westlands', 'Dagoretti North', 'Dagoretti South', 'Langata', 'Kibra', 'Roysambu', 'Kasarani', 'Ruaraka', 'Embakasi South', 'Embakasi North', 'Embakasi Central', 'Embakasi East', 'Embakasi West', 'Makadara', 'Kamukunji', 'Starehe', 'Mathare'],
     'Mombasa': ['Changamwe', 'Jomba', 'Kisauni', 'Nyali', 'Likoni', 'Mvita'],
-    'Kiambu': ['Gatundu South', 'Gatundu North', 'Juja', 'Thika Town', 'Ruiru', 'Githunguri', 'Kiambu Town', 'Kiambaa', 'Kabete', 'Kikuyu', 'Limuru', 'Lari']
+    'Kiambu': ['Gatundu South', 'Gatundu North', 'Juja', 'Thika Town', 'Ruiru', 'Githunguri', 'Kiambu Town', 'Kiambaa', 'Kabete', 'Kikuyu', 'Limuru', 'Lari'],
+    'Kisumu': ['Kisumu Central', 'Kisumu East', 'Kisumu West', 'Muhoroni', 'Nyakach', 'Nyando', 'Seme', 'Kadibo']
+  },
+  wards: {
+    'Kisumu Central': ['Kondele', 'Market Milimani', 'Migosi', 'Nyalenda B', 'Railways', 'Shauri Moyo Kaloleni'],
+    'Kisumu East': ['Kajulu', 'Kolwa Central', 'Kolwa East', 'Manyatta B', 'Nyalenda A'],
+    'Kisumu West': ['Central Kisumu', 'Kisumu North', 'North West Kisumu', 'South West Kisumu', 'West Kisumu'],
+    'Muhoroni': ['Chemelil', 'Masogo/Nyang\'oma', 'Miwani', 'Muhoroni Koru', 'Ombeyi'],
+    'Nyakach': ['Central Nyakach', 'North Nyakach', 'South East Nyakach', 'South West Nyakach', 'West Nyakach'],
+    'Nyando': ['Ahero', 'Awasi/Onjiko', 'East Kano/Wawidhi', 'Kabonyo/Kanyag Wal', 'Kobura'],
+    'Seme': ['Central Seme', 'East Seme', 'North Seme', 'West Seme'],
+    'Kadibo': ['Kabonyo/Kanyag Wal']
+  },
+  locations: {
+    'Kisumu Central': ['Town', 'Nyalenda B', 'Kondele'],
+    'Kisumu East': ['Kajulu East', 'Kajulu West', 'Kolwa West', 'Kasule', 'Manyatta B', 'North East Kolwa', 'Got Nyabondo', 'Konya'],
+    'Kisumu West': ['South West Location', 'Kisumu East', 'Central Kisumu', 'East Kisumu', 'North Kisumu', 'North West Location'],
+    'Seme': ['South Central Seme', 'Otwenya', 'East Seme', 'North Central Seme', 'West Seme', 'South West Seme']
+  },
+  subLocations: {
+    'Town': ['CBD', 'Anderson/Ondiek', 'Nyamlori', 'Nairobi Area', 'Upper Milimani', 'Lower Milimani'],
+    'Nyalenda B': ['Lower Railways', 'Kolwa West', 'Dunga', 'Nanga/Nyalenda B Kapuothe'],
+    'Kondele': ['Got Owak', 'Kilo/Western', 'Katuoro', 'Migosi', 'Upper [Migosi]'],
+    'Kajulu East': ['Nyalunya', 'Kasule', 'Chiga', 'Buoye'],
+    'Kajulu West': ['Mayenya', 'Manyatta', 'Nyalenda A', 'North Kasule'],
+    'Kolwa West': ['Kunya', 'Dago-Kanyakwar', 'Kuoyo', 'Saka'],
+    'Kasule': ['Oriang\'', 'Angira', 'Ong\'adi', 'Nyamonge'],
+    'South West Location': ['Ojola', 'Kanyawegi', 'Osiri', 'Korando A', 'Korando B'],
+    'Central Kisumu': ['Kogony', 'Bar A', 'Bar B', 'Nyahera'],
+    'North Kisumu': ['Dago', 'Mkendwa', 'West Karateng', 'East Karateng'],
+    'North West Location': ['Sunga', 'Marera'],
+    'South Central Seme': ['West Kanyadwera', 'East Kanyadwera', 'Upper Kombewa', 'Lower Kombewa'],
+    'East Seme': ['East Othany', 'West Othany', 'East Kolunje', 'West Kolunje'],
+    'North Central Seme': ['Kaila', 'Kitmikayi', 'Koker/Kajulu', 'West Kakelo'],
+    'West Seme': ['East Kakelo', 'East Katieno', 'Kadero', 'West Katieno'],
+    'South West Seme': ['North Kowe', 'South Kowe', 'North Ratta', 'South Ratta']
+  },
+  villages: {
+    'CBD': ['Kondele East', 'Kondele West', 'Upper Migosi', 'Lower Migosi'],
+    'Anderson/Ondiek': ['Southern [Market Milimani]', 'Northern [Market Milimani]'],
+    'Lower Railways': ['Lower Nyalenda B', 'Upper Nyalenda B', 'Upper Railways', 'Lower Railways'],
+    'Kolwa West': ['Kibuye', 'Kaloleni'],
+    'Kuoyo': ['Kuoyo (includes Auji, Flyover, Kuoyo Dispensary, Bata Toast, Nairobi Road)', 'Kuoyo Lands'],
+    'Dago-Kanyakwar': ['Kanyakwar (includes Auji, Carwash, Magadi Road, Koyango)', 'Kowino/Central/Western', 'Kanyakwar/Dago'],
+    'Chiga': ['Chiga'],
+    'Buoye': ['Buoye/Mayenya'],
+    'Ojola': ['Ojolla'],
+    'Osiri': ['Osiri/Kanyawegi'],
+    'Kogony': ['Kogony'],
+    'Korando A': ['Korando'],
+    'North Kisumu': ['East [North Kisumu]', 'North [North Kisumu]'],
+    'North West Location': ['North East [North West Kisumu]', 'North West [North West Kisumu]', 'Kapuonja', 'Kadongo/Newa'],
+    'South West Seme': ['South West Seme'],
+    'West Seme': ['West Seme'],
+    'South Central Seme': ['Upper Central Seme', 'Lower Central Seme'],
+    'East Seme': ['Upper East Seme', 'Lower East Seme'],
+    'North Central Seme': ['North Seme West', 'North Seme East']
   }
 };
 
@@ -52,6 +108,7 @@ const ApplicationForm = () => {
     // Location Information
     county: "",
     subCounty: "",
+    ward: "",
     division: "",
     location: "",
     subLocation: "",
@@ -100,7 +157,7 @@ const ApplicationForm = () => {
       case 1:
         return !!(formData.fullName && formData.email && formData.phone && formData.nationalId && formData.dateOfBirth && formData.gender);
       case 2:
-        return !!(formData.county && formData.subCounty && formData.division && formData.location && formData.subLocation && formData.village);
+        return !!(formData.county && formData.subCounty && formData.ward && formData.location && formData.subLocation && formData.village);
       case 3:
         return !!(formData.schoolName && formData.schoolLevel && formData.classYear);
       case 4:
@@ -352,7 +409,13 @@ const ApplicationForm = () => {
                 <Label htmlFor="subCounty">Sub County <span className="text-destructive">*</span></Label>
                 <Select 
                   value={formData.subCounty} 
-                  onValueChange={(value) => handleInputChange("subCounty", value)}
+                  onValueChange={(value) => {
+                    handleInputChange("subCounty", value);
+                    handleInputChange("ward", "");
+                    handleInputChange("location", "");
+                    handleInputChange("subLocation", "");
+                    handleInputChange("village", "");
+                  }}
                   disabled={!formData.county}
                 >
                   <SelectTrigger>
@@ -366,38 +429,91 @@ const ApplicationForm = () => {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="division">Division <span className="text-destructive">*</span></Label>
+                <Label htmlFor="ward">Ward <span className="text-destructive">*</span></Label>
+                <Select 
+                  value={formData.ward} 
+                  onValueChange={(value) => {
+                    handleInputChange("ward", value);
+                    handleInputChange("location", "");
+                    handleInputChange("subLocation", "");
+                    handleInputChange("village", "");
+                  }}
+                  disabled={!formData.subCounty}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select ward" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.subCounty && locationData.wards[formData.subCounty as keyof typeof locationData.wards]?.map((ward) => (
+                      <SelectItem key={ward} value={ward}>{ward}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="location">Location <span className="text-destructive">*</span></Label>
+                <Select 
+                  value={formData.location} 
+                  onValueChange={(value) => {
+                    handleInputChange("location", value);
+                    handleInputChange("subLocation", "");
+                    handleInputChange("village", "");
+                  }}
+                  disabled={!formData.subCounty}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.subCounty && locationData.locations[formData.subCounty as keyof typeof locationData.locations]?.map((location) => (
+                      <SelectItem key={location} value={location}>{location}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="subLocation">Sub Location <span className="text-destructive">*</span></Label>
+                <Select 
+                  value={formData.subLocation} 
+                  onValueChange={(value) => {
+                    handleInputChange("subLocation", value);
+                    handleInputChange("village", "");
+                  }}
+                  disabled={!formData.location}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select sub location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.location && locationData.subLocations[formData.location as keyof typeof locationData.subLocations]?.map((subLocation) => (
+                      <SelectItem key={subLocation} value={subLocation}>{subLocation}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="village">Village <span className="text-destructive">*</span></Label>
+                <Select 
+                  value={formData.village} 
+                  onValueChange={(value) => handleInputChange("village", value)}
+                  disabled={!formData.subLocation}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select village" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {formData.subLocation && locationData.villages[formData.subLocation as keyof typeof locationData.villages]?.map((village) => (
+                      <SelectItem key={village} value={village}>{village}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="division">Division</Label>
                 <Input
                   id="division"
                   value={formData.division}
                   onChange={(e) => handleInputChange("division", e.target.value)}
-                  placeholder="Enter division"
-                />
-              </div>
-              <div>
-                <Label htmlFor="location">Location <span className="text-destructive">*</span></Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => handleInputChange("location", e.target.value)}
-                  placeholder="Enter location"
-                />
-              </div>
-              <div>
-                <Label htmlFor="subLocation">Sub Location <span className="text-destructive">*</span></Label>
-                <Input
-                  id="subLocation"
-                  value={formData.subLocation}
-                  onChange={(e) => handleInputChange("subLocation", e.target.value)}
-                  placeholder="Enter sub location"
-                />
-              </div>
-              <div>
-                <Label htmlFor="village">Village <span className="text-destructive">*</span></Label>
-                <Input
-                  id="village"
-                  value={formData.village}
-                  onChange={(e) => handleInputChange("village", e.target.value)}
                   placeholder="Enter village name"
                 />
               </div>
