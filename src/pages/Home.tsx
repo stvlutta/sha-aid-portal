@@ -62,7 +62,7 @@ const Home = () => {
                 alt={`Community development ${index + 1}`}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-accent/90" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/40 to-accent/40" />
             </div>
           ))}
         </div>
