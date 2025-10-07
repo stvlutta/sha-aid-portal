@@ -4,8 +4,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { GraduationCap, Heart, FileText, Clock, Users, CheckCircle } from "lucide-react";
 import Layout from "@/components/layout/Layout";
+import { useState, useEffect } from "react";
+import hero1 from "@/assets/hero-1.jpg";
+import hero2 from "@/assets/hero-2.jpg";
+import hero3 from "@/assets/hero-3.jpg";
+import hero4 from "@/assets/hero-4.jpg";
 
 const Home = () => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const heroImages = [hero1, hero2, hero3, hero4];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+    }, 10000); // Change image every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const services = [
     {
@@ -31,13 +46,34 @@ const Home = () => {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary to-accent text-primary-foreground py-16">
-        <div className="container mx-auto px-4">
+      <section className="relative py-16 overflow-hidden">
+        {/* Background Image Carousel */}
+        <div className="absolute inset-0 z-0">
+          {heroImages.map((image, index) => (
+            <div
+              key={index}
+              className="absolute inset-0 transition-opacity duration-1000"
+              style={{
+                opacity: currentImageIndex === index ? 1 : 0,
+              }}
+            >
+              <img
+                src={image}
+                alt={`Community development ${index + 1}`}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-accent/90" />
+            </div>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-primary-foreground">
               Liet Ka Pas Community Development
             </h1>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
+            <p className="text-xl md:text-2xl mb-8 text-primary-foreground opacity-90">
               Supporting education and health through accessible financial assistance programs
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -55,6 +91,22 @@ const Home = () => {
               </Link>
             </div>
           </div>
+        </div>
+
+        {/* Image Indicators */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+          {heroImages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImageIndex(index)}
+              className={`w-3 h-3 rounded-full transition-all ${
+                currentImageIndex === index
+                  ? "bg-primary-foreground w-8"
+                  : "bg-primary-foreground/50"
+              }`}
+              aria-label={`Go to image ${index + 1}`}
+            />
+          ))}
         </div>
       </section>
 
